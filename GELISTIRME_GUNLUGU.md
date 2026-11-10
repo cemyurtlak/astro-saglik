@@ -4,6 +4,23 @@
 
 ---
 
+## Aşama 4 – GitHub'a yükleme ve internetten oynanabilir link
+**Tarih:** 2026-11-10
+
+**İstek:** Projeyi GitHub'a yükle; link gönderildiğinde başka bilgisayarlarda da çalışsın.
+
+**Yapılanlar:**
+- GitHub'da herkese açık depo oluşturuldu: https://github.com/cemyurtlak/astro-saglik
+- Tüm proje dosyaları yüklendi (oyun, `lib/three.min.js`, tek dosya sürüm, görseller, sunumlar, kayıt dosyaları).
+- **GitHub Pages** açıldı (main dalı, kök klasör) → oyun linki: https://cemyurtlak.github.io/astro-saglik/
+- README'ye oynama ve kaynak kod linkleri eklendi.
+
+**Değişen dosyalar:** `README.md`, `GELISTIRME_GUNLUGU.md`, `DEVAM_NOTLARI.md` (oyun kodu değişmedi)
+
+**Test durumu:** Depo içeriği GitHub API ile kontrol edildi (16 kayıt, dosya boyutları yerel dosyalarla aynı). Pages linki yayına alındıktan sonra açılıp test edildi.
+
+---
+
 ## Aşama 3 – Yarışma sunumları (Demo + Tam)
 **Tarih:** 2026-11-10
 

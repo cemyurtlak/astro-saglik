@@ -32,6 +32,8 @@ Bu oyunda oyuncu bir astronotu kontrol eder ve sağlığını kendisi izler:
 
 ## Kurulum / Çalıştırma
 Kurulum gerekmez.
+- **🌐 İnternetten oyna (her bilgisayar/tablet):** https://cemyurtlak.github.io/astro-saglik/
+- **Kaynak kod (GitHub):** https://github.com/cemyurtlak/astro-saglik
 - **Bilgisayarda:** `index.html` dosyasına çift tıkla (Chrome / Edge önerilir). `lib/three.min.js` dosyası yanında olmalı.
 - **Tablette (internetsiz):** `AstroSaglik_TekDosya.html` dosyasını tablete kopyala ve tarayıcıda aç (tek dosya, her şey içinde).
 - **Paylaşım linki:** Oyun ayrıca Claude Artifact olarak yayınlandı; link ile her cihazdan açılabilir.

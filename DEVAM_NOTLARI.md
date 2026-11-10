@@ -1,7 +1,7 @@
 # Devam Notları – Astro Sağlık
 
 ## Çalışma Kuralları
-- Her değişiklikten sonra `GELISTIRME_GUNLUGU.md`'ye yeni aşama ekle (son aşama: **Aşama 3**).
+- Her değişiklikten sonra `GELISTIRME_GUNLUGU.md`'ye yeni aşama ekle (son aşama: **Aşama 4**).
 - Özellik/kullanım/dosya yapısı değişirse `README.md`'yi güncelle.
 - `index.html` değişince `python tek_dosya_olustur.py` ile `AstroSaglik_TekDosya.html`'i yeniden üret.
 - Oyun dili Türkçe; hedef kitle ortaokul öğrencileri → metinler kısa, anlaşılır, eğitici.
@@ -40,6 +40,12 @@
 | `kameraGuncelle` | Göz kamerası (kafa hizası) / arkadan kamera (bina çarpışmalı) / menü kamerası |
 | `hudGuncelle`, `haritaCiz` | HUD ve mini harita |
 | `window.__astro` | Test için dışarı açılmış nesneler |
+
+## GitHub / Yayın
+- Depo: https://github.com/cemyurtlak/astro-saglik (herkese açık). Oyun linki: https://cemyurtlak.github.io/astro-saglik/
+- GitHub Pages `main` dalının kökünden yayınlanır; `index.html` kökte olmalı, `lib/three.min.js` yolu değişmemeli.
+- Güncelleme: değişen dosyaları GitHub'da aynı klasöre "Add file → Upload files" ile yükle; Pages 1-2 dakikada yenilenir.
+- Space Apps "Link to Final Project" için oyun linki kullanılabilir (şifresiz, herkese açık).
 
 ## Sunum Kuralları (Space Apps)
 - Demo: en fazla 7 slayt (kapak dahil) veya en fazla 30 sn video (İngilizce altyazılı). Aşılırsa Global Judging'e giremez.
