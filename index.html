@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#070b1f">
+<title>Astro Sağlık Görevi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b1f; --panel:rgba(14,20,50,.86); --panel2:rgba(26,36,84,.92); --ink:#f3f6ff; --muted:#a9b6e3;
+  --accent:#00a2ff; --accent-d:#0072c6; --yellow:#ffcf33; --good:#33d17a; --warn:#ffa62b; --bad:#ff4d6d;
+  --line:rgba(255,255,255,.14); --shadow:rgba(0,0,0,.38);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#070b1f; --panel:rgba(14,20,50,.86); --ink:#f3f6ff; } }
+:root[data-theme="dark"]{ --bg:#070b1f; --panel:rgba(14,20,50,.86); --ink:#f3f6ff; }
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  font-family:'Fredoka','Segoe UI',system-ui,-apple-system,sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#c{position:fixed;inset:0;width:100vw;height:100vh;display:block;touch-action:none;outline:none}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit}
+
+/* ---------- Butonlar ---------- */
+.btn{border:none;border-radius:14px;padding:12px 22px;font-size:18px;font-weight:700;color:#fff;background:var(--accent);
+  box-shadow:0 5px 0 var(--accent-d),0 8px 18px var(--shadow);transition:transform .06s, box-shadow .06s, filter .15s;letter-spacing:.3px}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--accent-d),0 3px 8px var(--shadow)}
+.btn:disabled{filter:grayscale(.8) brightness(.7);cursor:not-allowed}
+.btn.green{background:#2fbf63;box-shadow:0 5px 0 #1d8a43,0 8px 18px var(--shadow)}
+.btn.green:active{box-shadow:0 1px 0 #1d8a43}
+.btn.yellow{background:var(--yellow);color:#3a2a00;box-shadow:0 5px 0 #c99a0b,0 8px 18px var(--shadow)}
+.btn.yellow:active{box-shadow:0 1px 0 #c99a0b}
+.btn.red{background:#ff4d6d;box-shadow:0 5px 0 #c22a47,0 8px 18px var(--shadow)}
+.btn.red:active{box-shadow:0 1px 0 #c22a47}
+.btn.ghost{background:rgba(255,255,255,.1);box-shadow:0 5px 0 rgba(0,0,0,.35)}
+.btn.big{font-size:24px;padding:16px 30px;border-radius:18px}
+.btn.small{font-size:15px;padding:8px 14px;border-radius:11px}
+
+.card{background:var(--panel);border:3px solid var(--line);border-radius:22px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 14px 40px rgba(0,0,0,.45)}
+
+/* ---------- Ekranlar ---------- */
+#screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;
+  background:radial-gradient(ellipse at center,rgba(7,11,31,.25),rgba(7,11,31,.75));z-index:20}
+.wrap{width:100%;max-width:980px;margin:auto}
+.logo{text-align:center;margin-bottom:14px}
+.logo h1{font-size:clamp(38px,7vw,74px);line-height:1;font-weight:700;letter-spacing:2px;
+  background:linear-gradient(180deg,#fff 0%,#9fe3ff 55%,#3fa9ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 5px 0 #0b3b8f) drop-shadow(0 10px 22px rgba(0,0,0,.6))}
+.logo .sub{display:inline-block;margin-top:8px;background:var(--yellow);color:#3a2a00;font-weight:700;padding:6px 16px;border-radius:999px;
+  font-size:clamp(14px,2.2vw,19px);box-shadow:0 4px 0 #c99a0b;transform:rotate(-1.5deg)}
+.logo .tag{margin-top:10px;color:var(--muted);font-size:14px}
+.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.card.pad{padding:18px}
+.card h3{font-size:20px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.inp{flex:1;min-width:140px;font-size:18px;padding:12px 14px;border-radius:12px;border:3px solid var(--line);background:rgba(0,0,0,.35);color:#fff;outline:none;font-weight:600}
+.inp:focus{border-color:var(--accent)}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.sw{width:38px;height:38px;border-radius:10px;border:3px solid rgba(255,255,255,.25);box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.sw.sel{border-color:#fff;transform:scale(1.12)}
+.plist{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:250px;overflow:auto}
+.pitem{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.07);border-radius:14px;padding:8px 12px;font-size:19px;font-weight:600}
+.pitem .no{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.12);display:grid;place-items:center;font-size:15px}
+.pitem .x{margin-left:auto;background:none;border:none;color:#ff8da1;font-size:22px}
+.empty{color:var(--muted);font-size:15px;padding:10px 4px}
+.seg{display:flex;gap:6px;background:rgba(0,0,0,.3);padding:5px;border-radius:14px}
+.seg button{flex:1;border:none;background:none;color:var(--muted);font-weight:700;font-size:15px;padding:9px 6px;border-radius:10px}
+.seg button.on{background:var(--accent);color:#fff;box-shadow:0 3px 0 var(--accent-d)}
+.mini-rec{font-size:15px;color:var(--muted)}
+.mini-rec li{list-style:none;display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--line)}
+.mini-rec li b{color:var(--yellow)}
+.center{text-align:center}
+.mt{margin-top:14px}
+.muted{color:var(--muted)}
+
+/* Blok avatar (CSS) */
+.ava{display:inline-flex;flex-direction:column;align-items:center;--s:1}
+.ava .h{width:calc(26px*var(--s));height:calc(26px*var(--s));background:#ffd23f;border-radius:calc(4px*var(--s));position:relative;box-shadow:inset -3px -3px 0 rgba(0,0,0,.12)}
+.ava .h::before,.ava .h::after{content:"";position:absolute;top:32%;width:14%;height:24%;background:#111;border-radius:50%}
+.ava .h::before{left:26%}.ava .h::after{right:26%}
+.ava .h i{position:absolute;left:28%;right:28%;top:52%;height:22%;border:calc(2px*var(--s)) solid #111;border-top:none;border-radius:0 0 50% 50%}
+.ava .t{width:calc(44px*var(--s));height:calc(40px*var(--s));background:var(--c);border-radius:calc(3px*var(--s));box-shadow:inset -4px -4px 0 rgba(0,0,0,.15)}
+.ava .l{width:calc(44px*var(--s));height:calc(36px*var(--s));background:linear-gradient(90deg,#2b2d42 47%,transparent 47% 53%,#2b2d42 53%)}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+#hud>*{pointer-events:auto}
+#topbar{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}
+#topbar>*{pointer-events:auto}
+.chip{display:flex;align-items:center;gap:8px;background:var(--panel);border:3px solid var(--line);border-radius:14px;padding:6px 12px;font-weight:700;font-size:17px;white-space:nowrap}
+.chip .dot{width:16px;height:16px;border-radius:5px;border:2px solid #fff}
+.chip.score{background:linear-gradient(180deg,#ffd84d,#f2b705);color:#3a2a00;border-color:#fff3}
+.chip .mini{width:70px;height:9px;background:rgba(255,255,255,.15);border-radius:6px;overflow:hidden}
+.chip .mini i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffe066,#ff9f1c)}
+.spacer{flex:1}
+.ib{width:44px;height:44px;border-radius:12px;border:3px solid var(--line);background:var(--panel);color:#fff;font-size:20px;display:grid;place-items:center}
+.ib:active{transform:translateY(2px)}
+
+#healthPanel{position:absolute;top:66px;left:10px;width:232px;padding:10px;border-radius:18px}
+#healthPanel .ph{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;letter-spacing:.5px;color:#cfe3ff;margin-bottom:6px}
+#healthPanel .ph button{background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:8px;width:28px;height:24px;font-weight:700}
+#healthPanel.col #hrows{display:none}
+.hrow{display:flex;align-items:center;gap:8px;padding:4px 4px;border-radius:10px;cursor:pointer}
+.hrow:hover{background:rgba(255,255,255,.06)}
+.hrow .ic{font-size:20px;width:26px;text-align:center}
+.hrow .hm{flex:1;min-width:0}
+.hrow .hn{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#dbe5ff}
+.hrow .hn b{font-size:14px}
+.bar{height:10px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;border-radius:6px;transition:width .25s}
+.hrow.warn .hn b{color:var(--warn)}
+.hrow.crit{animation:blink 0.8s infinite}
+.hrow.crit .hn b{color:var(--bad)}
+@keyframes blink{50%{background:rgba(255,77,109,.28)}}
+
+#rightCol{position:absolute;top:66px;right:10px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+#rightCol>*{pointer-events:auto}
+#minimap{width:150px;height:150px;border-radius:18px;border:3px solid var(--line);background:var(--panel)}
+#tasks{width:190px;padding:10px 12px;border-radius:16px;font-size:14px}
+#tasks .tt{font-weight:700;color:#cfe3ff;font-size:13px;letter-spacing:.5px;margin-bottom:4px}
+#tasks div.t{padding:2px 0;display:flex;gap:6px;color:#dbe5ff}
+#tasks div.t.ok{color:var(--good);text-decoration:line-through;text-decoration-thickness:2px}
+
+#olayBanner{position:absolute;top:62px;left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 520px));min-width:300px;
+  display:flex;gap:12px;align-items:center;padding:10px 14px;border-radius:18px;background:linear-gradient(180deg,rgba(150,20,45,.92),rgba(95,10,30,.92));
+  border:3px solid #ff8da1;box-shadow:0 0 0 4px rgba(255,77,109,.25),0 10px 30px rgba(0,0,0,.5);animation:pulseB 1s infinite}
+@keyframes pulseB{50%{box-shadow:0 0 0 9px rgba(255,77,109,.12),0 10px 30px rgba(0,0,0,.5)}}
+#olayBanner .oi{font-size:36px}
+#olayBanner .ot{font-weight:700;font-size:18px}
+#olayBanner .om{font-size:13.5px;color:#ffd9e0;line-height:1.25}
+#olayBanner .okk{margin-left:auto;text-align:center;min-width:56px}
+#olayArrow{font-size:30px;line-height:1;display:inline-block;transition:transform .1s;color:var(--yellow);text-shadow:0 2px 0 #000}
+#olayKalan{font-weight:700;font-size:15px}
+#olayMesafe{font-size:12px;color:#ffd9e0}
+
+#prompt{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 18px;border-radius:16px;font-size:18px;font-weight:600;
+  background:var(--panel2);border:3px solid #7cc8ff;white-space:nowrap;cursor:pointer;animation:pop .2s}
+#prompt kbd{display:inline-block;background:#fff;color:#123;border-radius:7px;padding:1px 9px;margin-right:6px;font-family:inherit;font-weight:700;box-shadow:0 3px 0 #9ab}
+#prompt.alert{border-color:#ff8da1;background:rgba(120,15,35,.95)}
+@keyframes pop{from{transform:translateX(-50%) scale(.8);opacity:0}}
+#hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font-size:12.5px;color:rgba(220,230,255,.7);white-space:nowrap;pointer-events:none;text-shadow:0 1px 2px #000}
+
+/* Dokunmatik */
+#touch{display:none}
+body.touch #touch{display:block}
+body.touch #hint{display:none}
+body.touch #prompt{bottom:150px}
+#joy{position:absolute;left:24px;bottom:24px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.1);border:3px solid rgba(255,255,255,.3);touch-action:none}
+#joyKnob{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:0 4px 0 rgba(0,0,0,.3)}
+.tbtn{position:absolute;width:84px;height:84px;border-radius:50%;border:4px solid rgba(255,255,255,.55);color:#fff;font-size:30px;font-weight:700;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;touch-action:none;box-shadow:0 5px 0 rgba(0,0,0,.35)}
+.tbtn small{font-size:11px;margin-top:3px;letter-spacing:.5px}
+#btnJump{right:24px;bottom:28px;background:rgba(0,162,255,.75)}
+#btnAct{right:122px;bottom:60px;background:rgba(51,209,122,.75)}
+#btnAct.ready{animation:glow 0.9s infinite;background:rgba(51,209,122,.95)}
+@keyframes glow{50%{box-shadow:0 0 0 10px rgba(51,209,122,.25),0 5px 0 rgba(0,0,0,.35)}}
+
+#nisan{position:fixed;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.55);pointer-events:none;z-index:6;display:none}
+body.fp #nisan{display:block}
+#kilitIpucu{position:fixed;left:50%;top:58%;transform:translateX(-50%);padding:8px 14px;border-radius:12px;background:rgba(10,16,40,.72);color:#fff;font-size:14px;pointer-events:none;z-index:6;white-space:nowrap}
+body.touch #kilitIpucu{display:none}
+#flare{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:4;transition:opacity .4s;
+  background:radial-gradient(ellipse at center,rgba(255,140,0,0) 40%,rgba(255,90,0,.55) 100%)}
+#flare.on{opacity:1;animation:flr 0.7s infinite alternate}
+@keyframes flr{from{filter:brightness(1)}to{filter:brightness(1.6)}}
+#vignette{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:4;transition:opacity .5s;
+  background:radial-gradient(ellipse at center,rgba(255,0,40,0) 55%,rgba(255,0,40,.45) 100%)}
+#vignette.on{opacity:1;animation:flr 1s infinite alternate}
+
+#toasts{position:fixed;top:172px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;z-index:30;width:min(92vw,520px)}
+.toast{background:var(--panel2);border:3px solid var(--line);border-radius:14px;padding:9px 16px;font-weight:600;font-size:16px;text-align:center;
+  animation:tin .25s ease-out;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.toast.good{border-color:#5be59a}.toast.bad{border-color:#ff8da1}.toast.warn{border-color:#ffc164}.toast.info{border-color:#7cc8ff}
+.toast.out{animation:tout .35s forwards}
+@keyframes tin{from{transform:translateY(-12px) scale(.9);opacity:0}}
+@keyframes tout{to{transform:translateY(-10px);opacity:0}}
+#floats{position:fixed;inset:0;pointer-events:none;z-index:15}
+.float{position:absolute;font-weight:700;font-size:24px;text-shadow:0 3px 0 rgba(0,0,0,.6);animation:fl 1.2s ease-out forwards;transform:translate(-50%,-50%);white-space:nowrap}
+@keyframes fl{to{transform:translate(-50%,-140%);opacity:0}}
+
+/* ---------- Modal ---------- */
+#modal{position:fixed;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,8,24,.55)}
+#modalBox{width:100%;max-width:600px;max-height:calc(100vh - 28px);overflow:auto;padding:18px 20px 20px;animation:mpop .22s ease-out}
+@keyframes mpop{from{transform:scale(.88);opacity:0}}
+.mh{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.mh .mi{font-size:40px;width:58px;height:58px;display:grid;place-items:center;background:rgba(255,255,255,.1);border-radius:16px}
+.mh h2{font-size:26px}
+.lead{color:#dbe5ff;font-size:16.5px;line-height:1.4;margin-bottom:10px}
+.fact{margin-top:12px;background:rgba(0,162,255,.14);border:2px solid rgba(0,162,255,.45);border-radius:14px;padding:10px 12px;font-size:14.5px;line-height:1.4;color:#d8efff}
+.fact b{color:#7cd3ff}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.opt{text-align:left;border:3px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;padding:12px 14px;font-size:16.5px;font-weight:600;box-shadow:0 4px 0 rgba(0,0,0,.3)}
+.opt:hover{background:rgba(255,255,255,.13)}
+.opt.right{background:rgba(51,209,122,.3);border-color:#5be59a}
+.opt.wrong{background:rgba(255,77,109,.3);border-color:#ff8da1}
+.opt:disabled{cursor:default}
+.res{margin-top:12px;padding:12px;border-radius:14px;font-size:16px;line-height:1.4}
+.res.good{background:rgba(51,209,122,.18);border:2px solid #5be59a}
+.res.bad{background:rgba(255,77,109,.16);border:2px solid #ff8da1}
+.mfoot{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;flex-wrap:wrap}
+.scanbar{height:14px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden;margin:6px 0 12px}
+.scanbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#00e1ff,#33d17a);animation:scan 2.6s linear forwards}
+@keyframes scan{to{width:100%}}
+.vitals{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){.vitals{grid-template-columns:1fr}}
+.vital{display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(255,255,255,.07);border-radius:12px;padding:8px 10px;font-size:14.5px;opacity:0;animation:vin .3s forwards}
+.vital b{font-size:15.5px}
+.vital b.ok{color:#5be59a}.vital b.warn{color:#ffc164}.vital b.crit{color:#ff8da1}
+@keyframes vin{to{opacity:1}}
+.tapzone{display:flex;flex-direction:column;align-items:center;gap:12px;margin:8px 0}
+.tapbtn{width:170px;height:170px;border-radius:50%;border:none;font-size:34px;font-weight:700;color:#fff;background:radial-gradient(circle at 35% 30%,#ffb347,#ff6a00);
+  box-shadow:0 9px 0 #b34700,0 14px 30px rgba(0,0,0,.45);touch-action:manipulation}
+.tapbtn:active{transform:translateY(7px);box-shadow:0 2px 0 #b34700}
+.tapcount{font-size:44px;font-weight:700}
+.prog{width:100%;height:14px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffe066,#ff6a00)}
+.choice2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bigchoice{border:3px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:18px;padding:16px 12px;font-size:17px;font-weight:600;line-height:1.3;box-shadow:0 5px 0 rgba(0,0,0,.3)}
+.bigchoice .e{font-size:44px;display:block;margin-bottom:6px}
+.bigchoice:hover{background:rgba(255,255,255,.13)}
+.foods{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media (max-width:520px){.foods{grid-template-columns:repeat(3,1fr)}}
+.food{border:3px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;padding:8px 4px;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px}
+.food .e{font-size:32px}
+.food.sel{border-color:var(--yellow);background:rgba(255,207,51,.2);transform:translateY(-2px)}
+.plants{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.plant{height:96px;border-radius:16px;border:3px solid var(--line);background:rgba(80,180,90,.15);font-size:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;color:#fff}
+.plant small{font-size:12px;font-weight:600}
+.plant.dry{background:rgba(160,110,40,.25);border-color:#ffc164;filter:saturate(.3)}
+.plant.dry::after{content:"💧";position:absolute;top:4px;right:8px;font-size:24px;filter:none;animation:bob .5s infinite alternate}
+@keyframes bob{to{transform:translateY(-5px)}}
+.moods{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.mood{flex:1;min-width:80px;border:3px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:16px;padding:10px 4px;font-size:14px;font-weight:600}
+.mood .e{font-size:38px;display:block}
+.callbox{height:150px;border-radius:16px;background:linear-gradient(180deg,#123,#0a1a33);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;font-size:16px;position:relative;overflow:hidden}
+.callbox .big{font-size:56px;animation:bob .6s infinite alternate}
+.sleepbox{height:170px;border-radius:16px;background:linear-gradient(180deg,#0b0f2a,#1b1f4a);display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;overflow:hidden}
+.zz{position:absolute;font-size:28px;animation:zz 1.6s linear infinite;opacity:0}
+@keyframes zz{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}100%{opacity:0;transform:translate(40px,-90px)}}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){.checks{grid-template-columns:1fr}}
+
+/* Karne & sonuç */
+.bigscore{font-size:clamp(54px,10vw,88px);font-weight:700;color:var(--yellow);text-shadow:0 6px 0 #8a6100,0 10px 30px rgba(0,0,0,.5);line-height:1.05}
+.stars{font-size:40px;letter-spacing:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:rgba(255,255,255,.07);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-size:24px}
+.stat span{font-size:13px;color:var(--muted)}
+.hbars{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:8px}
+@media (max-width:560px){.hbars{grid-template-columns:1fr}}
+.hb{font-size:13.5px}
+.hb .bar{height:12px}
+.daychart{display:flex;align-items:flex-end;gap:10px;height:120px;padding:8px 6px 0;border-bottom:2px solid var(--line)}
+.daychart .dc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;font-size:12px}
+.daychart .dc i{display:block;width:100%;max-width:46px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#5be59a,#1d8a43)}
+.daylabels{display:flex;gap:10px;padding:4px 6px;font-size:12px;color:var(--muted)}
+.daylabels span{flex:1;text-align:center}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:10px 0 6px}
+.pod{display:flex;flex-direction:column;align-items:center;gap:6px;width:150px}
+.pod .blk{width:100%;border-radius:14px 14px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;font-weight:700;font-size:30px;box-shadow:inset 0 -8px 0 rgba(0,0,0,.2)}
+.pod .nm{font-weight:700;font-size:17px;text-align:center;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod .sc{font-weight:700;color:var(--yellow)}
+.rank{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+.rank td,.rank th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+.rank th{color:var(--muted);font-size:13px;font-weight:600}
+.rank td.r{text-align:right;font-weight:700;color:var(--yellow)}
+.helpgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.helpgrid{grid-template-columns:1fr}}
+.hcard{background:rgba(255,255,255,.06);border-radius:14px;padding:10px 12px;font-size:14.5px;line-height:1.4}
+.hcard b{font-size:16px}
+.kb{display:inline-block;background:#fff;color:#123;border-radius:6px;padding:0 7px;font-weight:700;box-shadow:0 2px 0 #9ab;margin:0 2px}
+
+@media (max-width:760px), (max-height:520px){
+  #healthPanel{width:178px;padding:8px;top:60px}
+  .hrow .ic{font-size:16px;width:20px}
+  .hrow .hn{font-size:11.5px}
+  .bar{height:8px}
+  #minimap{width:112px;height:112px}
+  #tasks{width:150px;font-size:12px;padding:8px}
+  .chip{font-size:14px;padding:5px 9px}
+  .ib{width:38px;height:38px;font-size:17px}
+  #olayBanner{top:auto;bottom:250px;width:calc(100vw - 20px);min-width:0}
+  body:not(.touch) #olayBanner{bottom:70px}
+  #olayBanner .oi{font-size:28px}
+  #olayBanner .om{font-size:12px}
+  #prompt{font-size:15px}
+}
+@media (max-height:520px){
+  #tasks{display:none}
+  #joy{width:118px;height:118px;left:16px;bottom:16px}
+  .tbtn{width:70px;height:70px;font-size:24px}
+  #btnAct{right:100px;bottom:40px}
+  body.touch #prompt{bottom:110px}
+  #olayBanner{bottom:auto;top:56px;width:min(440px,calc(100vw - 420px))}
+}
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0"></canvas>
+<div id="nisan"></div>
+<div id="kilitIpucu" class="hidden">🖱️ Fareyle etrafa bakmak için ekrana tıkla</div>
+<div id="flare"></div>
+<div id="vignette"></div>
+
+<div id="hud" class="hidden">
+  <div id="topbar">
+    <div class="chip"><span class="dot" id="hudDot"></span><span id="hudAd">Oyuncu</span></div>
+    <div class="chip"><span id="hudGun">GÜN 1/5</span><div class="mini"><i id="gunBar"></i></div><span id="hudSaat">45</span></div>
+    <div class="chip score">⭐ <span id="hudSkor">0</span></div>
+    <div class="spacer"></div>
+    <button class="ib" id="btnKam" title="Kamera: oyuncunun gözünden / arkadan (V)">👁</button>
+    <button class="ib" id="btnSes" title="Ses">🔊</button>
+    <button class="ib" id="btnFull" title="Tam ekran">⛶</button>
+    <button class="ib" id="btnPause" title="Duraklat">⏸</button>
+  </div>
+  <div id="healthPanel" class="card">
+    <div class="ph"><span>🩺 SAĞLIK PANELİ</span><button id="btnPanel">–</button></div>
+    <div id="hrows"></div>
+  </div>
+  <div id="rightCol">
+    <canvas id="minimap" width="300" height="300"></canvas>
+    <div id="tasks" class="card"></div>
+  </div>
+  <div id="olayBanner" class="hidden">
+    <div class="oi" id="olayIk">☀️</div>
+    <div><div class="ot" id="olayAd"></div><div class="om" id="olayMsg"></div></div>
+    <div class="okk"><div id="olayArrow">⬆</div><div id="olayKalan">20</div><div id="olayMesafe"></div></div>
+  </div>
+  <div id="prompt" class="hidden"></div>
+  <div id="hint"><span class="kb">W A S D</span> yürü · <span class="kb">Boşluk</span> zıpla · <span class="kb">E</span> kullan · tıkla + fareyi oynat: etrafa bak · <span class="kb">V</span> göz kamerası · tekerlek: yakınlaş</div>
+  <div id="touch">
+    <div id="joy"><div id="joyKnob"></div></div>
+    <button class="tbtn" id="btnAct">✋<small>KULLAN</small></button>
+    <button class="tbtn" id="btnJump">⤒<small>ZIPLA</small></button>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="floats"></div>
+<div id="modal" class="hidden"><div id="modalBox" class="card"></div></div>
+<div id="screen"></div>
+
+<noscript><p style="padding:20px">Bu oyun için JavaScript gerekli.</p></noscript>
+
+<script src="lib/three.min.js"></script>
+<script>
+/* =====================================================================
+   ASTRO SAĞLIK GÖREVİ
+   NASA Space Apps Challenge 2026 –
+   "Create Health Monitoring Software for Astronauts on Space Missions"
+   Tek sayfalık 3B web oyunu (Three.js r149). Tablet + bilgisayar.
+   ===================================================================== */
+(function(){
+'use strict';
+
+/* ---------------- Yardımcılar ---------------- */
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rand=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const show=el=>(typeof el==='string'?$(el):el).classList.remove('hidden');
+const hide=el=>(typeof el==='string'?$(el):el).classList.add('hidden');
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+const Store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+const REKOR_KEY='astroSaglik_rekorlar_v1';
+
+/* ---------------- Ses (WebAudio, dosya gerekmez) ---------------- */
+const Ses={
+  ctx:null,on:true,
+  init(){ if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume(); },
+  ton(f,d=.12,type='sine',v=.12,gec=0){
+    if(!this.on||!this.ctx)return;
+    const t=this.ctx.currentTime+gec,o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g);g.connect(this.ctx.destination);o.start(t);o.stop(t+d+.03);
+  },
+  kristal(){this.ton(988,.07,'square',.06);this.ton(1480,.12,'square',.06,.06);},
+  iyi(){[523,659,784,1046].forEach((f,i)=>this.ton(f,.16,'triangle',.11,i*.08));},
+  kotu(){this.ton(240,.22,'sawtooth',.08);this.ton(170,.3,'sawtooth',.08,.14);},
+  alarm(){for(let i=0;i<3;i++){this.ton(760,.16,'square',.07,i*.34);this.ton(540,.16,'square',.07,i*.34+.17);}},
+  tik(){this.ton(660,.05,'square',.04);},
+  zipla(){this.ton(330,.08,'sine',.08);this.ton(520,.1,'sine',.06,.05);},
+  tara(){for(let i=0;i<6;i++)this.ton(1200+i*80,.05,'sine',.05,i*.4);},
+  gun(){[392,523,659].forEach((f,i)=>this.ton(f,.25,'triangle',.09,i*.12));}
+};
+
+/* ---------------- Oyun verisi ---------------- */
+const RENKLER=['#ff4d6d','#ff9f1c','#ffd60a','#33d17a','#00b2ff','#7b61ff','#ff6fd8','#f1f3f8'];
+const GUN_SURE=45; // bir görev günü kaç saniye sürer
+
+// Sağlık göstergeleri (0-100, yüksek = iyi)
+const IND=[
+ {k:'kalp',ad:'Kalp-Damar',ik:'❤️',renk:'#ff4d6d',azal:.15,ist:'spor',
+  ipucu:'Uzayda kalp daha az zorlanır ve zamanla zayıflayabilir. Koşu bandı gibi aerobik egzersiz kalbi korur.'},
+ {k:'kemik',ad:'Kemik & Kas',ik:'🦴',renk:'#ffd166',azal:.24,ist:'spor',
+  ipucu:'Mikro yerçekiminde kemikler ayda yaklaşık %1–1,5 mineral kaybedebilir. Direnç egzersizi (ARED) ve kalsiyum şart.'},
+ {k:'bagisiklik',ad:'Bağışıklık',ik:'🛡️',renk:'#7bd389',azal:.13,ist:'mutfak',
+  ipucu:'Stres, radyasyon ve uykusuzluk bağışıklığı zayıflatır. Taze sebze-meyve, hijyen ve uyku yardımcı olur.'},
+ {k:'radyasyon',ad:'Radyasyon Güvenliği',ik:'☢️',renk:'#c77dff',azal:.05,ist:'siginak',
+  ipucu:'Uzay radyasyonu hücrelere zarar verebilir. Güneş patlamasında hemen Radyasyon Sığınağına gir!'},
+ {k:'moral',ad:'Ruh Hali',ik:'😊',renk:'#4cc9f0',azal:.19,ist:'iletisim',
+  ipucu:'Yalnızlık ve kapalı alan stres yaratır. Duygularını fark etmek, aileyle konuşmak ve bitki bakmak iyi gelir.'},
+ {k:'enerji',ad:'Uyku & Enerji',ik:'⚡',renk:'#ffb703',azal:.21,ist:'uyku',
+  ipucu:'Uzay istasyonunda günde 16 kez Güneş doğar; uyku düzeni bozulabilir. Düzenli uyumak dikkati korur.'},
+ {k:'su',ad:'Su & Beslenme',ik:'💧',renk:'#48cae4',azal:.27,ist:'mutfak',
+  ipucu:'Uzayda susama hissi azalabilir ama vücudun suya ihtiyacı sürer. Dengeli beslen, su içmeyi unutma.'}
+];
+const INDK={};IND.forEach(i=>INDK[i.k]=i);
+
+// Uzay istasyonu modülleri
+const ISTASYON=[
+ {id:'iletisim',ad:'İletişim Odası',ik:'📡',renk:0x3fa9ff,css:'#3fa9ff',acik:'Duygu kontrolü & aile görüşmesi'},
+ {id:'tip',ad:'Tıp Merkezi',ik:'🩺',renk:0xff5d73,css:'#ff5d73',acik:'Sağlık taraması yap'},
+ {id:'spor',ad:'Spor Alanı',ik:'🏋️',renk:0xff9f1c,css:'#ff9f1c',acik:'Egzersiz yap'},
+ {id:'mutfak',ad:'Mutfak',ik:'🍽️',renk:0x2ec4b6,css:'#2ec4b6',acik:'Dengeli öğün hazırla'},
+ {id:'sera',ad:'Sera',ik:'🌱',renk:0x70e000,css:'#70e000',acik:'Bitkileri sula'},
+ {id:'uyku',ad:'Uyku Kabini',ik:'🛏️',renk:0x7b61ff,css:'#7b61ff',acik:'Uyu ve dinlen'},
+ {id:'siginak',ad:'Radyasyon Sığınağı',ik:'☢️',renk:0xffd60a,css:'#ffd60a',acik:'Radyasyondan korun'}
+];
+const ISTK={};ISTASYON.forEach(s=>ISTK[s.id]=s);
+
+// Sağlık olayları (görev sırasında rastgele gelir)
+const OLAYLAR={
+ gunes:{ad:'GÜNEŞ PATLAMASI!',ik:'☀️',hedef:'siginak',sure:20,flare:true,
+   msj:'Güneşten yüksek enerjili parçacıklar geliyor! Hemen Radyasyon Sığınağına koş ve olay bitene kadar orada kal.'},
+ ates:{ad:'Ateş ve Halsizlik',ik:'🤒',hedef:'tip',sure:30,etki:{bagisiklik:-12},
+   msj:'Vücut ısın yükseldi, halsizsin. Tıp Merkezine git ve durumunu değerlendir.',
+   soru:'Ateşin 38,2°C, halsizsin ve boğazın ağrıyor. En doğru hareket hangisi?',
+   sec:[['Ateş düşürücü al, bol sıvı iç, dinlen ve Dünya\'daki uçuş doktoruna bildir',1],['Terleyip iyileşmek için yoğun egzersiz yap',0],['Belirtileri görmezden gel, çalışmaya devam et',0]],
+   bilgi:'Uzayda bağışıklık sistemi zayıflayabilir; vücutta saklanan bazı virüsler (ör. su çiçeği virüsü) yeniden aktifleşebilir. Erken fark etmek çok önemlidir.',
+   odul:{bagisiklik:25}},
+ kalp:{ad:'Çarpıntı',ik:'💓',hedef:'tip',sure:30,etki:{kalp:-12},
+   msj:'Kalbinin hızlı ve düzensiz attığını hissediyorsun. Tıp Merkezine git!',
+   soru:'Dinlenirken nabzın 118 ve düzensiz. Ne yapmalısın?',
+   sec:[['EKG çek, otur ve dinlen, verileri uçuş doktoruna gönder',1],['Hemen koşu bandında koş',0],['Bol kahve iç ve uyanık kal',0]],
+   bilgi:'Uzayda vücut sıvıları başa doğru kayar ve kalp-damar sistemi değişir. Ritim bozukluklarını erken yakalamak için EKG kullanılır.',
+   odul:{kalp:25}},
+ goz:{ad:'Bulanık Görme',ik:'👁️',hedef:'tip',sure:30,etki:{kalp:-6,moral:-6},
+   msj:'Yakını bulanık görmeye başladın. Tıp Merkezinde kontrol et.',
+   soru:'Uzun görevde görme bulanıklığı başladı. Doğru adım hangisi?',
+   sec:[['Göz muayenesi ve ultrason yap, sonucu uçuş doktoruna bildir',1],['Gözlerini ovuştur, kendiliğinden geçer',0],['Ekrana daha yakından bakarak çalış',0]],
+   bilgi:'NASA buna SANS (Uzay Uçuşuyla İlişkili Nöro-Oküler Sendrom) diyor. Sıvıların başa kayması göz arkasına baskı yapabilir.',
+   odul:{kalp:12,moral:12}},
+ stres:{ad:'Yalnızlık ve Stres',ik:'😔',hedef:'iletisim',sure:30,etki:{moral:-15},
+   msj:'Aylardır kapalı bir alandasın, ailen çok uzakta. İletişim Odasına git.',
+   soru:'Kendini yalnız ve gergin hissediyorsun. Hangisi en çok yardımcı olur?',
+   sec:[['Duygularını fark et, ailenle konuş, ekip arkadaşına anlat',1],['Kimseyle konuşmadan odana kapan',0],['Uykunu azaltıp daha çok çalış',0]],
+   bilgi:'Davranışsal sağlık uzun görevlerin en önemli risklerinden biri. Astronotlar düzenli olarak psikolog ve aileleriyle görüşür.',
+   odul:{moral:30}},
+ kemik:{ad:'Bel ve Bacak Ağrısı',ik:'🦴',hedef:'spor',sure:30,etki:{kemik:-12},
+   msj:'Belin ve bacakların ağrıyor; kemik ve kaslar zayıflıyor. Spor Alanına git!',
+   soru:'Kemik yoğunluğun düşüyor. Hangi plan en doğru?',
+   sec:[['Her gün direnç (ağırlık) egzersizi + kalsiyum ve D vitamini',1],['Hiç hareket etmeden dinlen',0],['Sadece şekerli yiyecekler ye',0]],
+   bilgi:'Uzay istasyonunda astronotlar günde yaklaşık 2 saat egzersiz yapar. ARED adlı cihaz vakum silindirleriyle ağırlık kaldırma etkisi verir.',
+   odul:{kemik:25}},
+ susuz:{ad:'Baş Ağrısı',ik:'🤕',hedef:'mutfak',sure:30,etki:{su:-15},
+   msj:'Başın ağrıyor ve ağzın kuru. Mutfağa git!',
+   soru:'Baş ağrısı ve ağız kuruluğu neyin işareti olabilir?',
+   sec:[['Susuzluk – su ve elektrolit içmeliyim',1],['Fazla su içtim',0],['Çok fazla uyudum',0]],
+   bilgi:'Mikro yerçekiminde susama hissi azalabilir; astronotlar ne kadar su içtiklerini takip eder. İstasyonda atık su bile arıtılıp yeniden içme suyu yapılır!',
+   odul:{su:30}},
+ uykusuz:{ad:'Uykusuzluk',ik:'🥱',hedef:'uyku',sure:30,etki:{enerji:-15},
+   msj:'Dikkatin dağılıyor, hata yapmaya başladın. Uyku Kabinine git!',
+   soru:'İstasyonda günde 16 gün doğumu var ve uyuyamıyorsun. Ne yapmalısın?',
+   sec:[['Uyku saatini sabitle, ışıkları kıs, göz bandı kullan, ekranları kapat',1],['Yatmadan önce tablette oyun oyna',0],['Gece kahve iç',0]],
+   bilgi:'Uzay istasyonundaki LED ışıklar gün içinde renk değiştirerek astronotların biyolojik saatine yardım eder.',
+   odul:{enerji:30}}
+};
+
+const G={
+  durum:'menu', // menu | intro | oyun | modal | duraklat | karne | sonuc
+  oyuncular:Store.get('astroSaglik_oyuncular',[]).map(o=>({ad:o.ad,renk:o.renk,skor:null,detay:null})),
+  sira:0, gunSayisi:5
+};
+
+/* ---------------- Three.js sahne ---------------- */
+const canvas=$('#c');
+let renderer;
+try{
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+}catch(e){
+  document.body.innerHTML='<div style="padding:30px;font-size:20px;color:#fff">Bu cihaz 3B grafik (WebGL) desteklemiyor. Lütfen güncel bir Chrome, Edge veya Safari ile açın.</div>';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x040714);
+const camera=new THREE.PerspectiveCamera(60,1,.1,1200);
+
+scene.add(new THREE.HemisphereLight(0xcfe3ff,0x2a2140,.9));
+const sun=new THREE.DirectionalLight(0xffffff,.95);
+sun.position.set(30,55,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:160});
+sun.shadow.bias=-.0008;
+scene.add(sun);
+const flareLight=new THREE.PointLight(0xff6a00,0,120);flareLight.position.set(0,30,0);scene.add(flareLight);
+
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t;}
+
+// Yıldızlar
+{
+  const N=2600,p=new Float32Array(N*3);
+  for(let i=0;i<N;i++){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,r=500+Math.random()*200,s=Math.sqrt(1-u*u);p[i*3]=Math.cos(a)*s*r;p[i*3+1]=u*r;p[i*3+2]=Math.sin(a)*s*r;}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:1.6,sizeAttenuation:false})));
+}
+// Dünya
+const earthTex=canvasTex(1024,512,(x,w,h)=>{
+  const gr=x.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#1d4f9a');gr.addColorStop(.5,'#1f6fc9');gr.addColorStop(1,'#1d4f9a');
+  x.fillStyle=gr;x.fillRect(0,0,w,h);
+  for(let i=0;i<26;i++){const cx=rand(0,w),cy=rand(70,h-70);x.fillStyle=pick(['#3f9b4a','#5aae4e','#b59a5a','#2f7d3c','#7aa356']);
+    for(let j=0;j<14;j++){x.beginPath();x.arc(cx+rand(-55,55),cy+rand(-30,30),rand(10,34),0,7);x.fill();}}
+  x.fillStyle='#f4f8ff';x.fillRect(0,0,w,26);x.fillRect(0,h-26,w,26);
+  x.globalAlpha=.55;x.fillStyle='#fff';for(let i=0;i<160;i++){x.beginPath();x.ellipse(rand(0,w),rand(0,h),rand(10,40),rand(3,9),0,0,7);x.fill();}
+});
+const earth=new THREE.Mesh(new THREE.SphereGeometry(70,48,32),new THREE.MeshLambertMaterial({map:earthTex}));
+earth.position.set(-170,-60,-300);scene.add(earth);
+const atm=new THREE.Mesh(new THREE.SphereGeometry(74,48,32),new THREE.MeshBasicMaterial({color:0x5fb8ff,transparent:true,opacity:.18,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+atm.position.copy(earth.position);scene.add(atm);
+// Ay
+const moonTex=canvasTex(256,128,(x,w,h)=>{x.fillStyle='#bdbdc4';x.fillRect(0,0,w,h);for(let i=0;i<60;i++){x.fillStyle=pick(['#9a9aa3','#a8a8b0','#d0d0d6']);x.beginPath();x.arc(rand(0,w),rand(0,h),rand(2,12),0,7);x.fill();}});
+const moon=new THREE.Mesh(new THREE.SphereGeometry(14,32,20),new THREE.MeshLambertMaterial({map:moonTex}));
+moon.position.set(220,90,-240);scene.add(moon);
+
+// Platform (Roblox tarzı taban)
+const floorTex=canvasTex(128,128,(x,w,h)=>{
+  x.fillStyle='#2b3456';x.fillRect(0,0,w,h);
+  x.fillStyle='#3c4772';x.fillRect(4,4,w-8,h-8);
+  x.fillStyle='rgba(255,255,255,.06)';x.fillRect(4,4,w-8,10);
+  x.fillStyle='rgba(255,255,255,.10)';x.beginPath();x.arc(w/2,h/2,16,0,7);x.fill();
+});
+floorTex.wrapS=floorTex.wrapT=THREE.RepeatWrapping;floorTex.repeat.set(32,32);
+const floor=new THREE.Mesh(new THREE.BoxGeometry(64,1,64),new THREE.MeshLambertMaterial({map:floorTex}));
+floor.position.y=-.5;floor.receiveShadow=true;scene.add(floor);
+// alt yapı
+{
+  const under=new THREE.Mesh(new THREE.CylinderGeometry(26,8,14,8),new THREE.MeshLambertMaterial({color:0x252b45}));
+  under.position.y=-8;scene.add(under);
+  const glow=new THREE.Mesh(new THREE.CylinderGeometry(6,3,3,16),new THREE.MeshBasicMaterial({color:0x34d5ff}));
+  glow.position.y=-16;scene.add(glow);
+}
+// kenar ışıkları + korkuluk
+const rimMat=new THREE.MeshBasicMaterial({color:0x34d5ff});
+[[0,32,64,.5],[0,-32,64,.5],[32,0,.5,64],[-32,0,.5,64]].forEach(([x,z,w,d])=>{
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,.25,d),rimMat);m.position.set(x,.1,z);scene.add(m);
+  const rail=new THREE.Mesh(new THREE.BoxGeometry(w===.5?.25:64,.18,d===.5?.25:64),new THREE.MeshLambertMaterial({color:0x8fa3d9}));
+  rail.position.set(x*0.985,1.1,z*0.985);scene.add(rail);
+});
+for(let i=-30;i<=30;i+=6){[[i,31.6],[i,-31.6],[31.6,i],[-31.6,i]].forEach(([x,z])=>{const p=new THREE.Mesh(new THREE.BoxGeometry(.25,1.1,.25),new THREE.MeshLambertMaterial({color:0x8fa3d9}));p.position.set(x,.55,z);scene.add(p);});}
+
+/* ---------- Çarpışma sistemi ---------- */
+const COL=[];
+function addCol(x,z,th,hx,hz,top,land){COL.push({x,z,c:Math.cos(th),s:Math.sin(th),hx,hz,top,land:!!land});}
+function cozCarpisma(p,r){
+  for(const o of COL){
+    if(p.y>=o.top-.05)continue;
+    const dx=p.x-o.x,dz=p.z-o.z;
+    let lx=dx*o.c-dz*o.s,lz=dx*o.s+dz*o.c;
+    const cx=clamp(lx,-o.hx,o.hx),cz=clamp(lz,-o.hz,o.hz);
+    const ex=lx-cx,ez=lz-cz,d2=ex*ex+ez*ez;
+    if(d2>=r*r)continue;
+    if(d2>1e-8){const d=Math.sqrt(d2),push=r-d;lx+=ex/d*push;lz+=ez/d*push;}
+    else{const px=o.hx-Math.abs(lx),pz=o.hz-Math.abs(lz);if(px<pz)lx=Math.sign(lx||1)*(o.hx+r);else lz=Math.sign(lz||1)*(o.hz+r);}
+    p.x=o.x+lx*o.c+lz*o.s;p.z=o.z-lx*o.s+lz*o.c;
+  }
+}
+function zeminY(p){
+  let g=0;
+  for(const o of COL){
+    if(!o.land)continue;
+    const dx=p.x-o.x,dz=p.z-o.z,lx=dx*o.c-dz*o.s,lz=dx*o.s+dz*o.c;
+    if(Math.abs(lx)<=o.hx+.25&&Math.abs(lz)<=o.hz+.25&&p.y>=o.top-.45)g=Math.max(g,o.top);
+  }
+  return g;
+}
+
+/* ---------- Yazı etiketleri ---------- */
+function etiket(text,bg,yuk=1.5){
+  const c=document.createElement('canvas'),x=c.getContext('2d'),fs=58;
+  const font=`700 ${fs}px Fredoka, "Segoe UI", "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+  x.font=font;const w=Math.ceil(x.measureText(text).width)+64;c.width=w;c.height=100;
+  x.font=font;rr(x,5,5,w-10,90,40);x.fillStyle=bg;x.fill();x.lineWidth=7;x.strokeStyle='rgba(255,255,255,.95)';x.stroke();
+  x.textAlign='center';x.textBaseline='middle';x.lineWidth=8;x.strokeStyle='rgba(0,0,0,.35)';x.strokeText(text,w/2,54);x.fillStyle='#fff';x.fillText(text,w/2,54);
+  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.minFilter=THREE.LinearFilter;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true}));sp.scale.set(yuk*w/100,yuk,1);return sp;
+}
+
+/* ---------- İstasyon binaları ---------- */
+const R_IST=22,PAD_UZ=6.5;
+const L=c=>new THREE.MeshLambertMaterial({color:c});
+const beyaz=L(0xe9edf7),gri=L(0x9aa6c7),koyu=L(0x283050);
+function kutu(w,h,d,m,x,y,z,par,golge=true){const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);me.position.set(x,y,z);if(golge){me.castShadow=true;me.receiveShadow=true;}par.add(me);return me;}
+ISTASYON.forEach((st,i)=>{
+  const a=-Math.PI/2+i*2*Math.PI/7;
+  st.x=Math.cos(a)*R_IST;st.z=Math.sin(a)*R_IST;
+  const th=Math.atan2(-st.x,-st.z);st.th=th;
+  st.px=st.x+Math.sin(th)*PAD_UZ;st.pz=st.z+Math.cos(th)*PAD_UZ;
+  const g=new THREE.Group();g.position.set(st.x,0,st.z);g.rotation.y=th;scene.add(g);
+  const renk=L(st.renk);
+  const govde=st.id==='siginak'?L(0x8d94a8):beyaz;
+  kutu(8,5,6,govde,0,2.5,0,g);
+  kutu(8.3,.9,6.3,renk,0,5.2,0,g);
+  kutu(8.4,.5,6.4,koyu,0,.25,0,g);
+  // kapı
+  const kapi=new THREE.Mesh(new THREE.BoxGeometry(2.6,3.4,.2),new THREE.MeshLambertMaterial({color:st.renk,emissive:st.renk,emissiveIntensity:.55}));
+  kapi.position.set(0,1.7,3.02);g.add(kapi);
+  kutu(3.2,.35,.35,koyu,0,3.55,3.05,g,false);
+  // pencereler
+  const cam=new THREE.MeshLambertMaterial({color:0x9fe3ff,emissive:0x2a7fb8,emissiveIntensity:.6});
+  [[-2.9,3],[2.9,3]].forEach(([x])=>{const w=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.2,.15),cam);w.position.set(x,3,3.02);g.add(w);});
+  // yan pencere şeridi
+  [-4.02,4.02].forEach(x=>{const w=new THREE.Mesh(new THREE.BoxGeometry(.15,.8,4.2),cam);w.position.set(x,3.3,0);g.add(w);});
+  // aksesuarlar
+  if(st.id==='tip'){kutu(2.6,.8,.8,L(0xffffff),0,6.4,0,g);kutu(.8,2.6,.8,L(0xffffff),0,6.4,0,g);kutu(2.2,.5,.85,L(0xff3355),0,6.4,0,g);kutu(.5,2.2,.85,L(0xff3355),0,6.4,0,g);}
+  if(st.id==='spor'){const bar=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,5,10),gri);bar.rotation.z=Math.PI/2;bar.position.set(0,6.4,0);g.add(bar);
+    [-2.2,2.2].forEach(x=>{const d=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,.6,16),koyu);d.rotation.z=Math.PI/2;d.position.set(x,6.4,0);d.castShadow=true;g.add(d);});}
+  if(st.id==='mutfak'){const el=new THREE.Mesh(new THREE.SphereGeometry(1.3,16,12),L(0xff3b3b));el.position.set(0,6.9,0);el.castShadow=true;g.add(el);kutu(.2,.8,.2,L(0x6b3e1f),0,8.3,0,g);kutu(.8,.15,.4,L(0x33d17a),.4,8.3,0,g);}
+  if(st.id==='sera'){const kub=new THREE.Mesh(new THREE.SphereGeometry(3.2,20,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshLambertMaterial({color:0x9dff9d,transparent:true,opacity:.35}));kub.position.set(0,5.6,0);g.add(kub);
+    for(let k=0;k<6;k++){kutu(.7,rand(.8,1.8),.7,L(pick([0x2fbf63,0x56d364,0x1d8a43])),rand(-2,2),6.2,rand(-1.5,1.5),g);}}
+  if(st.id==='iletisim'){kutu(.3,2.4,.3,gri,0,6.8,0,g);const dish=new THREE.Mesh(new THREE.SphereGeometry(1.6,20,10,0,Math.PI*2,0,Math.PI/2.6),L(0xf1f3f8));dish.rotation.x=Math.PI*.75;dish.position.set(0,8,.3);dish.material.side=THREE.DoubleSide;g.add(dish);}
+  if(st.id==='uyku'){const ay=new THREE.Mesh(new THREE.SphereGeometry(1.1,16,12),new THREE.MeshLambertMaterial({color:0xfff3a3,emissive:0xffe066,emissiveIntensity:.5}));ay.position.set(0,6.9,0);g.add(ay);}
+  if(st.id==='siginak'){for(let k=0;k<8;k++){kutu(1,.9,6.35,L(k%2?0x222222:0xffd60a),-3.5+k,1.2,0,g,false);}kutu(9,5.6,.6,L(0x6d7488),0,2.8,-3.2,g);}
+  // etiket
+  const lab=etiket(`${st.ik} ${st.ad}`,st.css+'dd',1.5);lab.position.set(0,9.6,0);g.add(lab);st.lab=lab;
+  // zemin pedi
+  const pad=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.1,.12,36),new THREE.MeshLambertMaterial({color:st.renk,emissive:st.renk,emissiveIntensity:.6,transparent:true,opacity:.85}));
+  pad.position.set(st.px,.06,st.pz);scene.add(pad);st.pad=pad;
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(2.3,.12,8,40),new THREE.MeshBasicMaterial({color:0xffffff}));
+  ring.rotation.x=Math.PI/2;ring.position.set(st.px,.2,st.pz);scene.add(ring);st.ring=ring;
+  addCol(st.x,st.z,th,4,3,9,false);
+});
+
+// Merkez hologram
+const holoGrp=new THREE.Group();scene.add(holoGrp);
+{
+  const taban=new THREE.Mesh(new THREE.CylinderGeometry(3.5,3.8,.25,32),new THREE.MeshLambertMaterial({color:0x34406e}));taban.position.y=.12;taban.receiveShadow=true;holoGrp.add(taban);
+  const kolon=new THREE.Mesh(new THREE.CylinderGeometry(.55,.75,2.4,16),gri);kolon.position.y=1.2;kolon.castShadow=true;holoGrp.add(kolon);
+  addCol(0,0,0,.65,.65,20,false);
+}
+const holo=new THREE.Mesh(new THREE.IcosahedronGeometry(1.7,1),new THREE.MeshBasicMaterial({color:0x34d5ff,wireframe:true,transparent:true,opacity:.8}));
+holo.position.y=4.4;scene.add(holo);
+const holoIc=new THREE.Mesh(new THREE.SphereGeometry(.9,20,14),new THREE.MeshBasicMaterial({color:0xff4d6d,transparent:true,opacity:.75}));
+holoIc.position.y=4.4;scene.add(holoIc);
+const holoRing=new THREE.Mesh(new THREE.TorusGeometry(2.6,.06,8,60),new THREE.MeshBasicMaterial({color:0x34d5ff}));
+holoRing.position.y=4.4;holoRing.rotation.x=Math.PI/2;scene.add(holoRing);
+{const lb=etiket('❤️ SAĞLIK MERKEZİ','#0b4f86dd',1.1);lb.position.set(0,7.2,0);scene.add(lb);}
+
+// Köşe güneş panelleri
+[[27.5,27.5],[-27.5,27.5],[27.5,-27.5],[-27.5,-27.5]].forEach(([x,z])=>{
+  kutu(.6,9,.6,gri,x,4.5,z,scene);
+  const pTex=canvasTex(128,64,(c,w,h)=>{c.fillStyle='#14306e';c.fillRect(0,0,w,h);c.strokeStyle='#5d8ee0';c.lineWidth=2;for(let i=0;i<=w;i+=16){c.beginPath();c.moveTo(i,0);c.lineTo(i,h);c.stroke();}for(let j=0;j<=h;j+=16){c.beginPath();c.moveTo(0,j);c.lineTo(w,j);c.stroke();}});
+  const pm=new THREE.MeshLambertMaterial({map:pTex,emissive:0x0a1a40});
+  const pnl=new THREE.Mesh(new THREE.BoxGeometry(7,.15,3.2),pm);pnl.position.set(x,9.2,z);pnl.rotation.y=Math.atan2(x,z);pnl.rotation.z=.35;pnl.castShadow=true;scene.add(pnl);
+  addCol(x,z,0,.5,.5,30,false);
+});
+
+// Parkur kutuları (zıplanabilir)
+const KUTULAR=[[6.6,5.2,2,1],[8.3,6.9,2,2],[10,8.6,2,3],[-7.5,7.5,2.4,1],[-8,-8.5,2,1.5],[7.2,-7.4,1.8,1],[-12,-1,2,1],[3,10,1.6,1]];
+const kutuTex=canvasTex(128,128,(x,w,h)=>{x.fillStyle='#e6a23c';x.fillRect(0,0,w,h);x.strokeStyle='#8a5a12';x.lineWidth=10;x.strokeRect(5,5,w-10,h-10);x.beginPath();x.moveTo(10,10);x.lineTo(w-10,h-10);x.moveTo(w-10,10);x.lineTo(10,h-10);x.stroke();});
+KUTULAR.forEach(([x,z,s,h])=>{
+  const m=new THREE.Mesh(new THREE.BoxGeometry(s,h,s),new THREE.MeshLambertMaterial({map:kutuTex}));
+  m.position.set(x,h/2,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);
+  addCol(x,z,0,s/2,s/2,h,true);
+});
+
+/* ---------- Kristaller (veri parçacıkları) ---------- */
+const kristalGeo=new THREE.OctahedronGeometry(.45);
+const kristalMat=new THREE.MeshLambertMaterial({color:0x5ff0ff,emissive:0x1fb8ff,emissiveIntensity:.8});
+const altinMat=new THREE.MeshLambertMaterial({color:0xffe066,emissive:0xffb000,emissiveIntensity:.9});
+const kristaller=[];
+function bosYer(){
+  for(let t=0;t<60;t++){
+    const a=rand(0,Math.PI*2),r=rand(4,29),x=Math.cos(a)*r,z=Math.sin(a)*r;
+    if(Math.abs(x)>29.5||Math.abs(z)>29.5)continue;
+    if(ISTASYON.some(s=>Math.hypot(x-s.x,z-s.z)<6.3))continue;
+    if(KUTULAR.some(k=>Math.hypot(x-k[0],z-k[1])<k[2]))continue;
+    return [x,z];
+  }
+  return [0,8];
+}
+for(let i=0;i<14;i++){const m=new THREE.Mesh(kristalGeo,kristalMat);const [x,z]=bosYer();m.position.set(x,1.2,z);m.userData={bekle:0,deger:10,ofs:Math.random()*6};scene.add(m);kristaller.push(m);}
+{const m=new THREE.Mesh(new THREE.OctahedronGeometry(.6),altinMat);m.position.set(10,4.3,8.6);m.userData={bekle:0,deger:30,ofs:0,sabit:true,y0:4.3};scene.add(m);kristaller.push(m);}
+
+// Olay işaret ışını
+const isin=new THREE.Mesh(new THREE.CylinderGeometry(2,2,70,24,1,true),new THREE.MeshBasicMaterial({color:0xff3355,transparent:true,opacity:.28,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+isin.visible=false;scene.add(isin);
+
+/* ---------- Blok avatar (Roblox tarzı) ---------- */
+const yuzTex=canvasTex(128,128,(x,w,h)=>{x.fillStyle='#ffd23f';x.fillRect(0,0,w,h);x.fillStyle='#111';
+  x.beginPath();x.ellipse(44,54,8,14,0,0,7);x.fill();x.beginPath();x.ellipse(84,54,8,14,0,0,7);x.fill();
+  x.lineWidth=7;x.strokeStyle='#111';x.lineCap='round';x.beginPath();x.arc(64,70,26,.18*Math.PI,.82*Math.PI);x.stroke();});
+function avatarYap(){
+  const root=new THREE.Group(),body=new THREE.Group();root.add(body);body.scale.setScalar(.55);
+  const gomlek=new THREE.MeshLambertMaterial({color:0xff4d6d}),pantolon=L(0x2b2d42),ten=L(0xffd23f),beyazM=L(0xf1f3f8);
+  const B=(w,h,d,m)=>{const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);me.castShadow=true;return me;};
+  const govde=B(2,2,1,gomlek);govde.position.y=3;body.add(govde);
+  const rozet=B(.55,.35,.06,beyazM);rozet.position.set(.5,3.45,.52);body.add(rozet);
+  const kalpR=B(.25,.25,.07,L(0xff3355));kalpR.position.set(.5,3.45,.53);body.add(kalpR);
+  const kafa=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.2),[ten,ten,ten,ten,new THREE.MeshLambertMaterial({map:yuzTex}),ten]);
+  kafa.position.y=4.6;kafa.castShadow=true;body.add(kafa);
+  const kask=new THREE.Mesh(new THREE.SphereGeometry(1.05,20,16),new THREE.MeshLambertMaterial({color:0xbfe8ff,transparent:true,opacity:.22,depthWrite:false}));
+  kask.position.y=4.65;body.add(kask);
+  const sirt=B(1.5,1.7,.7,beyazM);sirt.position.set(0,3.1,-.85);body.add(sirt);
+  const isik=new THREE.Mesh(new THREE.BoxGeometry(.3,.3,.1),new THREE.MeshBasicMaterial({color:0x33ff99}));isik.position.set(.4,3.6,-1.22);body.add(isik);
+  const kol=(sx)=>{const p=new THREE.Group();p.position.set(sx*1.5,4,0);const u=B(1,1.4,1,gomlek);u.position.y=-.7;p.add(u);const el=B(1,.6,1,ten);el.position.y=-1.7;p.add(el);body.add(p);return p;};
+  const bacak=(sx)=>{const p=new THREE.Group();p.position.set(sx*.5,2,0);const u=B(1,1.6,1,pantolon);u.position.y=-.8;p.add(u);const bot=B(1.02,.4,1.1,beyazM);bot.position.set(0,-1.8,.04);p.add(bot);body.add(p);return p;};
+  root.userData={gomlek,kolL:kol(-1),kolR:kol(1),bacL:bacak(-1),bacR:bacak(1),body};
+  return root;
+}
+const avatar=avatarYap();scene.add(avatar);
+let isimEtiketi=null;
+function avatarAyarla(ad,renk){
+  avatar.userData.gomlek.color.set(renk);
+  if(isimEtiketi){avatar.remove(isimEtiketi);isimEtiketi.material.map.dispose();}
+  isimEtiketi=etiket(ad,'rgba(10,16,40,.75)',.75);isimEtiketi.position.y=3.65;avatar.add(isimEtiketi);
+}
+
+/* ---------- Oyuncu fiziği & kamera ---------- */
+const P={x:0,y:0,z:7,vy:0,yer:true,yon:Math.PI,faz:0,hiz:0};
+const kam={yaw:0,pitch:.38,uzak:13,fp:!!Store.get('astroSaglik_gozKamera',false),bak:0};
+const HIZ=9,YERCEKIM=30,ZIPLAMA=11.5;
+const tus={};let ziplaIstek=false;
+const joy={x:0,y:0,id:null};
+
+function hareket(dt){
+  let ix=0,iz=0;
+  if(tus.KeyW||tus.ArrowUp)iz+=1;if(tus.KeyS||tus.ArrowDown)iz-=1;
+  if(tus.KeyA||tus.ArrowLeft)ix-=1;if(tus.KeyD||tus.ArrowRight)ix+=1;
+  ix+=joy.x;iz-=joy.y;
+  const len=Math.hypot(ix,iz);if(len>1){ix/=len;iz/=len;}
+  const fx=-Math.sin(kam.yaw),fz=-Math.cos(kam.yaw),rx=Math.cos(kam.yaw),rz=-Math.sin(kam.yaw);
+  const mx=(fx*iz+rx*ix)*HIZ,mz=(fz*iz+rz*ix)*HIZ;
+  P.x+=mx*dt;P.z+=mz*dt;
+  cozCarpisma(P,.65);
+  P.x=clamp(P.x,-31,31);P.z=clamp(P.z,-31,31);
+  if(ziplaIstek&&P.yer){P.vy=ZIPLAMA;P.yer=false;Ses.zipla();}
+  ziplaIstek=false;
+  P.vy-=YERCEKIM*dt;P.y+=P.vy*dt;
+  const g=zeminY(P);
+  if(P.y<=g){P.y=g;P.vy=0;P.yer=true;}else if(P.y>g+.05)P.yer=false;
+  const sp=Math.hypot(mx,mz);P.hiz=sp;
+  if(kam.fp){P.yon=kam.yaw+Math.PI;}
+  else if(sp>.1){const hedef=Math.atan2(mx,mz);let d=hedef-P.yon;d=Math.atan2(Math.sin(d),Math.cos(d));P.yon+=d*Math.min(1,dt*14);}
+}
+function avatarAnim(dt){
+  const u=avatar.userData;
+  avatar.position.set(P.x,P.y,P.z);avatar.rotation.y=P.yon;
+  P.faz+=dt*P.hiz*1.25;
+  const amt=P.hiz>.1?1:0;
+  let kolHedef,bacak;
+  if(!P.yer){kolHedef=-Math.PI*.85;bacak=.35;}
+  else{kolHedef=Math.sin(P.faz)*.9*amt;bacak=Math.sin(P.faz)*.9*amt;}
+  const k=Math.min(1,dt*16);
+  u.kolL.rotation.x+=(kolHedef-u.kolL.rotation.x)*k;
+  u.kolR.rotation.x+=((P.yer?-kolHedef:kolHedef)-u.kolR.rotation.x)*k;
+  u.bacL.rotation.x+=(-bacak-u.bacL.rotation.x)*k;
+  u.bacR.rotation.x+=((P.yer?bacak:-bacak*.3)-u.bacR.rotation.x)*k;
+  u.body.position.y=amt&&P.yer?Math.abs(Math.sin(P.faz))*.08:0;
+}
+
+/* ---------- Girdi ---------- */
+function tuslariTemizle(){for(const k in tus)tus[k]=false;joy.x=joy.y=0;}
+let modalTus=null;
+addEventListener('keydown',e=>{
+  if(e.target&&e.target.tagName==='INPUT')return;
+  if(G.durum==='modal'&&modalTus){modalTus(e);return;}
+  tus[e.code]=true;
+  if(G.durum==='oyun'){
+    if(e.code==='Space'){ziplaIstek=true;e.preventDefault();}
+    if(e.code==='KeyE'||e.code==='Enter'){etkiles();e.preventDefault();}
+    if(e.code==='KeyV'){kameraModu(!kam.fp);toast(kam.fp?'👁 Oyuncunun gözünden bakıyorsun':'🎥 Arkadan kamera','info',1600);}
+    if(e.code==='Escape'||e.code==='KeyP')duraklat();
+    if(e.code.startsWith('Arrow'))e.preventDefault();
+  }else if(G.durum==='duraklat'&&(e.code==='Escape'||e.code==='KeyP'))devam();
+});
+addEventListener('keyup',e=>{tus[e.code]=false;});
+addEventListener('blur',tuslariTemizle);
+
+let surukle=null;
+// Kameraya bakış: fare hareketi (veya sürükleme) yaw/pitch'i döndürür
+function bakisDondur(dx,dy,hs){
+  kam.yaw-=dx*hs;
+  if(kam.fp)kam.bak=clamp(kam.bak+dy*hs*.85,-1.35,1.35);
+  else kam.pitch=clamp(kam.pitch+dy*hs*.85,.05,1.25);
+}
+// Fare kilidi (Pointer Lock): bilgisayarda ekrana bir kez tıklayınca fareyi oynatmak yeterli
+const kilitVar=!!canvas.requestPointerLock;
+const kilitli=()=>document.pointerLockElement===canvas;
+function kilitle(){
+  if(!kilitVar||kilitli()||G.durum!=='oyun'||document.body.classList.contains('touch'))return;
+  try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(_){}
+}
+function kilitAc(){if(kilitli())try{document.exitPointerLock();}catch(_){}}
+document.addEventListener('pointerlockchange',()=>kilitIpucuGuncelle());
+function kilitIpucuGuncelle(){
+  const goster=kilitVar&&G.durum==='oyun'&&!kilitli()&&!document.body.classList.contains('touch');
+  $('#kilitIpucu').classList.toggle('hidden',!goster);
+}
+document.addEventListener('mousemove',e=>{
+  if(!kilitli()||G.durum!=='oyun')return;
+  const mx=e.movementX||0,my=e.movementY||0;
+  if(Math.abs(mx)>300||Math.abs(my)>300)return; // bazı tarayıcılardaki ani sıçramaları yok say
+  bakisDondur(mx,my,.0028);
+});
+canvas.addEventListener('pointerdown',e=>{
+  Ses.init();
+  if(e.pointerType==='touch')document.body.classList.add('touch');
+  if(e.pointerType==='mouse'){kilitle();if(kilitli())return;}
+  if(surukle)return;
+  surukle={id:e.pointerId,x:e.clientX,y:e.clientY};
+  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+});
+canvas.addEventListener('pointermove',e=>{
+  if(kilitli()||!surukle||surukle.id!==e.pointerId)return;
+  const dx=e.clientX-surukle.x,dy=e.clientY-surukle.y;surukle.x=e.clientX;surukle.y=e.clientY;
+  bakisDondur(dx,dy,e.pointerType==='touch'?.008:.006);
+});
+const birak=e=>{if(surukle&&surukle.id===e.pointerId)surukle=null;};
+canvas.addEventListener('pointerup',birak);canvas.addEventListener('pointercancel',birak);
+// Tekerlek: yakınlaş; en yakına gelince göz kamerasına geçer, gözdeyken geri çevirince arkaya döner
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  if(kam.fp){if(e.deltaY>0){kameraModu(false);kam.uzak=6;}return;}
+  if(e.deltaY<0&&kam.uzak<=5.01){kameraModu(true);return;}
+  kam.uzak=clamp(kam.uzak+e.deltaY*.01,5,24);
+},{passive:false});
+// Göz kamerası (1. şahıs) / arkadan kamera (3. şahıs)
+function kameraModu(fp){
+  kam.fp=fp;
+  if(fp)kam.bak=0;else kam.pitch=.38;
+  document.body.classList.toggle('fp',fp);
+  $('#btnKam').textContent=fp?'🎥':'👁';
+  $('#btnKam').title=fp?'Arkadan kamera (V)':'Oyuncunun gözünden (V)';
+  Store.set('astroSaglik_gozKamera',fp);
+}
+
+// Joystick
+const joyEl=$('#joy'),knob=$('#joyKnob');
+joyEl.addEventListener('pointerdown',e=>{Ses.init();joy.id=e.pointerId;try{joyEl.setPointerCapture(e.pointerId);}catch(_){}joyMove(e);e.preventDefault();});
+joyEl.addEventListener('pointermove',e=>{if(joy.id===e.pointerId)joyMove(e);});
+const joyBirak=e=>{if(joy.id===e.pointerId){joy.id=null;joy.x=joy.y=0;knob.style.transform='';}};
+joyEl.addEventListener('pointerup',joyBirak);joyEl.addEventListener('pointercancel',joyBirak);
+function joyMove(e){const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,max=r.width*.38;
+  let dx=e.clientX-cx,dy=e.clientY-cy;const d=Math.hypot(dx,dy);if(d>max){dx*=max/d;dy*=max/d;}
+  knob.style.transform=`translate(${dx}px,${dy}px)`;joy.x=dx/max;joy.y=dy/max;}
+$('#btnJump').addEventListener('pointerdown',e=>{e.preventDefault();ziplaIstek=true;});
+$('#btnAct').addEventListener('pointerdown',e=>{e.preventDefault();etkiles();});
+$('#prompt').addEventListener('click',()=>etkiles());
+addEventListener('touchstart',()=>document.body.classList.add('touch'),{passive:true,once:true});
+if(matchMedia('(pointer: coarse)').matches)document.body.classList.add('touch');
+document.addEventListener('pointerdown',()=>Ses.init(),{once:true});
+
+/* ---------- HUD kurulumu ---------- */
+$('#hrows').innerHTML=IND.map(i=>`<div class="hrow" id="h-${i.k}" data-k="${i.k}"><span class="ic">${i.ik}</span><div class="hm"><div class="hn"><span>${i.ad}</span><b>80</b></div><div class="bar"><i style="background:${i.renk}"></i></div></div></div>`).join('');
+$('#hrows').addEventListener('click',e=>{const r=e.target.closest('.hrow');if(!r)return;const i=INDK[r.dataset.k];toast(`${i.ik} <b>${i.ad}</b>: ${i.ipucu}`,'info',5200);});
+$('#btnPanel').addEventListener('click',()=>{const p=$('#healthPanel');p.classList.toggle('col');$('#btnPanel').textContent=p.classList.contains('col')?'+':'–';});
+if(innerWidth<560){$('#healthPanel').classList.add('col');$('#btnPanel').textContent='+';}
+$('#btnSes').addEventListener('click',()=>{Ses.on=!Ses.on;$('#btnSes').textContent=Ses.on?'🔊':'🔇';});
+const fsEl=document.documentElement;
+const fsVar=!!(fsEl.requestFullscreen||fsEl.webkitRequestFullscreen);
+if(!fsVar)hide('#btnFull');
+$('#btnFull').addEventListener('click',()=>{
+  const d=document;
+  if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}
+  else{(fsEl.requestFullscreen||fsEl.webkitRequestFullscreen).call(fsEl);}
+});
+$('#btnPause').addEventListener('click',()=>duraklat());
+$('#btnKam').addEventListener('click',()=>kameraModu(!kam.fp));
+kameraModu(kam.fp);
+
+const hrowEls={};IND.forEach(i=>{const r=$('#h-'+i.k);hrowEls[i.k]={r,b:r.querySelector('b'),bar:r.querySelector('.bar i')};});
+const GOREV_TANIM=[['tarama','🩺','Sağlık taraması'],['spor','🏋️','Egzersiz'],['ogun','🍽️','Dengeli öğün'],['duygu','📡','Duygu kontrolü']];
+
+/* ---------- Toast / yüzen yazı ---------- */
+function toast(html,tip='info',ms=2800){
+  const t=document.createElement('div');t.className='toast '+tip;t.innerHTML=html;$('#toasts').appendChild(t);
+  const list=$('#toasts').children;if(list.length>3)list[0].remove();
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),360);},ms);
+}
+function yuzenYazi(txt,renk){
+  const v=new THREE.Vector3(P.x,P.y+3.4,P.z).project(camera);
+  const d=document.createElement('div');d.className='float';d.textContent=txt;d.style.color=renk;
+  d.style.left=((v.x+1)/2*innerWidth)+'px';d.style.top=((1-v.y)/2*innerHeight)+'px';
+  $('#floats').appendChild(d);setTimeout(()=>d.remove(),1250);
+}
+function puan(n,renk){G.skor=Math.max(0,G.skor+n);yuzenYazi((n>=0?'+':'')+n+' ⭐',renk||(n>=0?'#ffd60a':'#ff4d6d'));}
+function etkiUygula(e){for(const k in e)G.s[k]=clamp(G.s[k]+e[k],0,100);}
+function ortalama(){return IND.reduce((a,i)=>a+G.s[i.k],0)/IND.length;}
+
+/* =====================================================================
+   GÖREV AKIŞI
+   ===================================================================== */
+function planOlustur(){
+  const normal=Object.keys(OLAYLAR).filter(k=>k!=='gunes');
+  let torba=[];const sonraki=()=>{if(!torba.length)torba=shuffle(normal.slice());return torba.pop();};
+  const plan=[];
+  for(let d=1;d<=G.gunSayisi;d++){
+    const b=(d-1)*GUN_SURE;
+    if(d===1){plan.push({t:b+12,k:sonraki()});continue;}
+    const gunes=(d===2||d===4||d===6);
+    const a=gunes?'gunes':sonraki(),c=sonraki();
+    const sira=Math.random()<.5?[a,c]:[c,a];
+    plan.push({t:b+rand(4,8),k:sira[0]});plan.push({t:b+rand(25,29),k:sira[1]});
+  }
+  return plan;
+}
+function yeniGorev(){
+  Object.assign(G,{
+    gun:1,t:0,gt:0,skor:0,doz:0,olay:null,cd:{},yelek:false,radQuiz:false,
+    s:{kalp:80,kemik:80,bagisiklik:80,radyasyon:90,moral:80,enerji:80,su:80},
+    gorevler:{tarama:false,spor:false,ogun:false,duygu:false},gorevBonus:false,
+    ist:{dogru:0,yanlis:0,cozulen:0,kacan:0,tarama:0,kristal:0,aktivite:0},
+    gunluk:[],ruh:[],uyari:{},yakin:null,sebep:null
+  });
+  G.olayPlan=planOlustur();
+  P.x=0;P.y=0;P.z=7;P.vy=0;P.yon=Math.PI;kam.yaw=0;kam.pitch=.38;
+  kristaller.forEach(m=>{if(!m.userData.sabit){const [x,z]=bosYer();m.position.x=x;m.position.z=z;}m.visible=true;m.userData.bekle=0;});
+  isin.visible=false;hide('#olayBanner');$('#flare').classList.remove('on');flareLight.intensity=0;
+  gorevListesi();
+}
+function gorevListesi(){
+  $('#tasks').innerHTML='<div class="tt">📋 GÜNLÜK GÖREVLER</div>'+GOREV_TANIM.map(([k,ik,ad])=>`<div class="t ${G.gorevler[k]?'ok':''}">${G.gorevler[k]?'✅':'⬜'} ${ik} ${ad}</div>`).join('');
+}
+function gorevTamam(k){
+  if(G.gorevler[k])return;G.gorevler[k]=true;gorevListesi();
+  if(!G.gorevBonus&&Object.values(G.gorevler).every(Boolean)){G.gorevBonus=true;setTimeout(()=>{puan(100);toast('📋 Tüm günlük görevler tamam! <b>+100</b>','good');Ses.iyi();},400);}
+}
+
+function guncelle(dt){
+  G.gt+=dt;G.t+=dt;
+  const carpan=1+.08*(G.gun-1);
+  for(const i of IND)G.s[i.k]=clamp(G.s[i.k]-i.azal*carpan*dt,0,100);
+  G.doz+=.045*dt;
+  for(const k in G.cd)G.cd[k]=Math.max(0,G.cd[k]-dt);
+  if(!G.olay&&G.olayPlan.length&&G.gt>=G.olayPlan[0].t)olayBaslat(G.olayPlan.shift().k);
+  if(G.olay)olayGuncelle(dt);
+  hareket(dt);
+  kristalKontrol(dt);
+  yakinBul();
+  for(const i of IND){
+    const v=G.s[i.k];
+    if(v<=0){bitir(false,i);return;}
+    if(v<25&&!G.uyari[i.k]){G.uyari[i.k]=true;const st=ISTK[i.ist];toast(`⚠️ <b>${i.ad}</b> kritik seviyede! ${st.ik} ${st.ad}'na git.`,'warn',3600);Ses.kotu();}
+    if(v>35)G.uyari[i.k]=false;
+  }
+  $('#vignette').classList.toggle('on',IND.some(i=>G.s[i.k]<20));
+  if(G.t>=GUN_SURE)gunSonu();
+}
+function gunSonu(){
+  const ort=ortalama(),bonus=Math.round(ort*1.5);
+  G.gunluk.push({gun:G.gun,ort});
+  puan(bonus,'#5be59a');
+  toast(`🌙 <b>${G.gun}. gün tamamlandı!</b> Sağlık bonusu +${bonus}`,'good',3200);Ses.gun();
+  G.gun++;G.t=0;G.yelek=false;G.gorevBonus=false;
+  G.gorevler={tarama:false,spor:false,ogun:false,duygu:false};gorevListesi();
+  if(G.gun>G.gunSayisi){bitir(true);return;}
+  setTimeout(()=>toast(`☀️ <b>${G.gun}. gün başladı.</b> Sağlık panelini kontrol et!`,'info'),900);
+}
+
+/* ---------- Olaylar ---------- */
+function olayBaslat(k){
+  const o=Object.assign({key:k,kalan:OLAYLAR[k].sure,ulasti:false},OLAYLAR[k]);
+  G.olay=o;
+  if(o.etki)etkiUygula(o.etki);
+  const st=ISTK[o.hedef];
+  isin.position.set(st.px,35,st.pz);isin.material.color.set(o.flare?0xffa000:0xff3355);isin.visible=true;
+  $('#olayIk').textContent=o.ik;$('#olayAd').textContent=o.ad;$('#olayMsg').textContent=o.msj;show('#olayBanner');
+  if(o.flare){$('#flare').classList.add('on');}
+  Ses.alarm();
+  toast(`${o.ik} <b>${o.ad}</b> → ${st.ik} ${st.ad}`,'bad',3200);
+}
+function olayGuncelle(dt){
+  const o=G.olay;o.kalan-=dt;
+  const st=ISTK[o.hedef];
+  if(o.flare){
+    const icinde=Math.hypot(P.x-st.px,P.z-st.pz)<4.2;
+    flareLight.intensity=1.2+Math.sin(T*10)*.5;
+    if(icinde){if(!o.ulasti){o.ulasti=true;G.ist.cozulen++;puan(150);Ses.iyi();toast('🛡️ Sığınaktasın! Kalın duvarlar ve su tankları seni koruyor. Fırtına bitene kadar bekle.','good',3600);}}
+    else{G.s.radyasyon=clamp(G.s.radyasyon-2.4*dt,0,100);G.doz+=1.6*dt;}
+    $('#olayMsg').textContent=icinde?'Güvendesin! Fırtına geçene kadar sığınakta kal.':o.msj;
+  }
+  if(o.kalan<=0)olayBitir(false);
+}
+function olayBitir(cozuldu){
+  const o=G.olay;if(!o)return;
+  if(o.flare){
+    if(o.ulasti){toast('☀️ Güneş fırtınası geçti. Harika iş!','good');etkiUygula({radyasyon:5});}
+    else{G.ist.kacan++;puan(-50);toast('☢️ Sığınağa ulaşamadın, fazla radyasyon aldın!','bad');Ses.kotu();}
+  }else if(!cozuldu){
+    G.ist.kacan++;etkiUygula(o.etki||{});puan(-50);toast(`⏰ <b>${o.ad}</b> zamanında ele alınmadı! Sağlığın kötüleşti.`,'bad',3200);Ses.kotu();
+  }
+  G.olay=null;isin.visible=false;hide('#olayBanner');$('#flare').classList.remove('on');flareLight.intensity=0;
+  if(G.olayPlan.length&&G.olayPlan[0].t<G.gt+6)G.olayPlan[0].t=G.gt+6;
+}
+
+/* ---------- Kristaller ---------- */
+function kristalKontrol(dt){
+  for(const m of kristaller){
+    const u=m.userData;
+    if(!m.visible){u.bekle-=dt;if(u.bekle<=0){if(!u.sabit){const [x,z]=bosYer();m.position.x=x;m.position.z=z;}m.visible=true;}continue;}
+    const dy=(P.y+1.3)-m.position.y;
+    if(Math.hypot(P.x-m.position.x,P.z-m.position.z)<1.35&&Math.abs(dy)<1.7){
+      m.visible=false;u.bekle=u.sabit?15:7;G.ist.kristal++;puan(u.deger,u.sabit?'#ffe066':'#7cf3ff');Ses.kristal();
+    }
+  }
+}
+
+/* ---------- Yakındaki istasyon ---------- */
+function yakinBul(){
+  let en=null,ed=3.4;
+  for(const st of ISTASYON){const d=Math.hypot(P.x-st.px,P.z-st.pz);if(d<ed&&P.y<1){ed=d;en=st;}}
+  G.yakin=en;
+}
+function promptGuncelle(){
+  const st=G.yakin,el=$('#prompt'),act=$('#btnAct');
+  if(!st||G.durum!=='oyun'){hide(el);act.classList.remove('ready');return;}
+  const olayHedef=G.olay&&!G.olay.flare&&G.olay.hedef===st.id;
+  const cd=G.cd[st.id]||0;
+  let metin;
+  if(olayHedef)metin=`⚠️ <b>${G.olay.ad}</b> – durumu değerlendir!`;
+  else if(st.id==='siginak'&&G.olay&&G.olay.flare)metin='🛡️ Sığınaktasın, burada bekle!';
+  else if(cd>0)metin=`<span class="muted">${Math.ceil(cd)} sn sonra hazır</span>`;
+  else metin=st.acik;
+  const kb=document.body.classList.contains('touch')?'':'<kbd>E</kbd>';
+  el.innerHTML=`${kb}${st.ik} <b>${st.ad}</b> — ${metin}`;
+  el.classList.toggle('alert',!!olayHedef);show(el);
+  act.classList.toggle('ready',olayHedef||cd<=0);
+}
+
+function etkiles(){
+  if(G.durum!=='oyun')return;
+  const st=G.yakin;if(!st)return;
+  Ses.tik();
+  const o=G.olay;
+  if(o&&!o.flare&&o.hedef===st.id){
+    if(st.id==='tip'){oyunTip(o);}else{olaySoru(o);}
+    return;
+  }
+  if(st.id==='siginak'&&o&&o.flare){toast('🛡️ Fırtına bitene kadar sığınakta kal!','info');return;}
+  if((G.cd[st.id]||0)>0){toast(`${st.ik} ${st.ad} ${Math.ceil(G.cd[st.id])} sn sonra hazır olacak.`,'info',1800);return;}
+  ({tip:()=>oyunTip(null),spor:oyunSpor,mutfak:oyunMutfak,uyku:oyunUyku,sera:oyunSera,iletisim:oyunIletisim,siginak:oyunSiginak})[st.id]();
+}
+
+/* =====================================================================
+   MODAL & MİNİ OYUNLAR
+   ===================================================================== */
+let modalTok=0;
+function modalAc(baslik,ik,html){
+  modalTok++;G.durum='modal';tuslariTemizle();modalTus=null;hide('#prompt');
+  $('#modalBox').innerHTML=`<div class="mh"><span class="mi">${ik}</span><h2>${baslik}</h2></div><div class="mb">${html}</div>`;
+  show('#modal');return modalTok;
+}
+function govde(html){$('#modalBox .mb').innerHTML=html;}
+function sonra(tok,ms,fn){setTimeout(()=>{if(tok===modalTok&&G.durum==='modal')fn();},ms);}
+function modalKapat(cdIst,cdSure){
+  modalTok++;hide('#modal');modalTus=null;
+  if(cdIst)G.cd[cdIst]=cdSure||15;
+  if(G.durum==='modal'){G.durum='oyun';kilitle();}
+  sonZaman=performance.now();
+}
+function devamBtn(cdIst,metin='Devam ▶',cdSure){
+  return `<div class="mfoot"><button class="btn green" id="mDevam" data-cd="${cdIst||''}" data-cds="${cdSure||''}">${metin}</button></div>`;
+}
+$('#modalBox').addEventListener('click',e=>{
+  const b=e.target.closest('#mDevam');if(!b)return;
+  Ses.tik();modalKapat(b.dataset.cd||null,+b.dataset.cds||15);
+});
+
+/* --- Olay sorusu (değerlendir & harekete geç) --- */
+function olaySoru(o,onEk){
+  const tok=modalTok&&G.durum==='modal'?modalTok:modalAc(o.ad,o.ik,'');
+  const sec=shuffle(o.sec.map(s=>s.slice()));
+  govde(`${onEk||''}<p class="lead"><b>Değerlendir:</b> ${esc(o.soru)}</p><div class="opts">${sec.map((s,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(65+i)}) ${esc(s[0])}</button>`).join('')}</div><div id="sonuc"></div>`);
+  const btns=[...document.querySelectorAll('#modalBox .opt')];
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    const s=sec[+b.dataset.i],dogru=!!s[1];
+    btns.forEach((x,i)=>{x.disabled=true;if(sec[i][1])x.classList.add('right');});
+    if(!dogru)b.classList.add('wrong');
+    if(dogru){etkiUygula(o.odul);G.ist.dogru++;G.ist.cozulen++;puan(150);Ses.iyi();}
+    else{G.ist.yanlis++;puan(-20);Ses.kotu();}
+    const odulTxt=Object.entries(o.odul).map(([k,v])=>`${INDK[k].ik} +${v}`).join('  ');
+    $('#sonuc').innerHTML=`<div class="res ${dogru?'good':'bad'}">${dogru?`✅ <b>Doğru karar! +150 ⭐</b> ${odulTxt}`:'❌ <b>Bu doğru değildi. −20 ⭐</b> Doğru cevap yeşil ile gösterildi.'}</div><div class="fact">🚀 <b>Gerçek uzayda:</b> ${esc(o.bilgi)}</div>${devamBtn()}`;
+    olayBitir(true);
+  }));
+}
+
+/* --- Tıp Merkezi: sağlık taraması --- */
+function durumSinif(v){return v>=60?'ok':v>=30?'warn':'crit';}
+function vitaller(){
+  const s=G.s,o=G.olay;
+  const nabiz=Math.round(62+(100-s.kalp)*.5+(o&&o.key==='kalp'?34:0)+rand(-3,3));
+  const sis=Math.round(110+(100-s.kalp)*.35),dia=Math.round(70+(100-s.kalp)*.2);
+  const spo2=Math.round(99-(100-s.bagisiklik)*.05);
+  const ates=(36.6+(100-s.bagisiklik)*.012+(o&&o.key==='ates'?1.6:0)).toFixed(1);
+  return [
+    ['💓','Nabız',nabiz+' atım/dk',nabiz<95?'ok':nabiz<110?'warn':'crit'],
+    ['🩸','Tansiyon',`${sis}/${dia} mmHg`,durumSinif(s.kalp)],
+    ['🫁','Kandaki oksijen',spo2+'%',durumSinif(s.bagisiklik)],
+    ['🌡️','Vücut ısısı',ates+' °C',+ates<37.3?'ok':+ates<38?'warn':'crit'],
+    ['🦴','Kemik yoğunluğu',`%${(100-(100-s.kemik)*.12).toFixed(1)} (uçuş öncesine göre)`,durumSinif(s.kemik)],
+    ['☢️','Radyasyon dozu',G.doz.toFixed(1)+' mSv',durumSinif(s.radyasyon)],
+    ['🧠','Stres düzeyi',s.moral>=60?'Düşük':s.moral>=30?'Orta':'Yüksek',durumSinif(s.moral)],
+    ['😴','Uyku',(4+s.enerji*.045).toFixed(1)+' saat',durumSinif(s.enerji)],
+    ['💧','Vücut suyu',s.su>=60?'İyi':s.su>=30?'Az':'Çok az',durumSinif(s.su)]
+  ];
+}
+function oyunTip(olay){
+  const v=vitaller();
+  const tok=modalAc('Sağlık Taraması','🩺',
+    `<p class="lead">1️⃣ <b>Veri topla:</b> Sensörler vücudunu tarıyor...</p><div class="scanbar"><i></i></div>
+     <div class="vitals">${v.map((r,i)=>`<div class="vital" style="animation-delay:${i*.28}s"><span>${r[0]} ${r[1]}</span><b class="${r[3]}">${r[2]}</b></div>`).join('')}</div><div id="tipDevam"></div>`);
+  Ses.tara();
+  sonra(tok,2800,()=>{
+    G.ist.tarama++;
+    let ek='';
+    if(!G.gorevler.tarama){puan(60);ek='<div class="res good">📋 Günlük sağlık kontrolü tamamlandı! <b>+60 ⭐</b></div>';gorevTamam('tarama');}
+    if(olay){
+      $('#tipDevam').innerHTML=`${ek}<div class="mfoot"><button class="btn red" id="tipOlay">2️⃣ Belirtiyi değerlendir ▶</button></div>`;
+      $('#tipOlay').onclick=()=>{Ses.tik();olaySoru(olay,`<div class="vitals" style="margin-bottom:8px">${v.filter(r=>r[3]!=='ok').map(r=>`<div class="vital" style="opacity:1"><span>${r[0]} ${r[1]}</span><b class="${r[3]}">${r[2]}</b></div>`).join('')}</div>`);};
+    }else{
+      $('#tipDevam').innerHTML=ek+degerlendirmeHTML();
+      degerlendirmeBagla();
+    }
+  });
+}
+function degerlendirmeHTML(){
+  const sirali=IND.slice().sort((a,b)=>G.s[a.k]-G.s[b.k]);
+  const en=sirali[0];
+  let sec,soru;
+  if(G.s[en.k]>=70){
+    soru='Tüm değerlerin iyi görünüyor! Şimdi ne yapmalısın?';
+    sec=[['Rutine devam: egzersiz, dengeli beslenme, düzenli uyku',1,null],['Artık egzersize gerek yok, bırak',0,null],['Su içmeyi azalt',0,null]];
+  }else{
+    soru='2️⃣ <b>Değerlendir:</b> Verilere göre en çok hangi alana dikkat etmelisin?';
+    const diger=shuffle(sirali.slice(2)).slice(0,2);
+    sec=[[`${en.ik} ${en.ad}`,1,en],...diger.map(d=>[`${d.ik} ${d.ad}`,0,d])];
+  }
+  degerlendirmeHTML.sec=shuffle(sec);degerlendirmeHTML.en=en;
+  return `<p class="lead mt">${soru}</p><div class="opts">${degerlendirmeHTML.sec.map((s,i)=>`<button class="opt" data-i="${i}">${s[0]}</button>`).join('')}</div><div id="degSonuc"></div>`;
+}
+function degerlendirmeBagla(){
+  const sec=degerlendirmeHTML.sec,en=degerlendirmeHTML.en;
+  const btns=[...document.querySelectorAll('#tipDevam .opt')];
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    const s=sec[+b.dataset.i],dogru=!!s[1];
+    btns.forEach((x,i)=>{x.disabled=true;if(sec[i][1])x.classList.add('right');});
+    if(!dogru)b.classList.add('wrong');
+    if(dogru){puan(80);G.ist.dogru++;Ses.iyi();}else{G.ist.yanlis++;Ses.kotu();}
+    const st=ISTK[en.ist];
+    const plan=G.s[en.k]>=70?'Harika gidiyorsun. Günlük görevlerini tamamlamaya devam et!':`3️⃣ <b>Harekete geç:</b> ${st.ik} <b>${st.ad}</b>'na git. ${esc(en.ipucu)}`;
+    $('#degSonuc').innerHTML=`<div class="res ${dogru?'good':'bad'}">${dogru?'✅ <b>Doğru değerlendirme! +80 ⭐</b>':'❌ Tam değil. En düşük değer yeşil ile gösterildi.'}</div><div class="fact">${plan}</div>${devamBtn('tip','Devam ▶',12)}`;
+  }));
+}
+
+/* --- Spor Alanı --- */
+function oyunSpor(){
+  const tok=modalAc('Spor Alanı','🏋️',`<p class="lead">Uzayda kaslar ve kemikler kullanılmazsa zayıflar. Hangi egzersizi yapacaksın?</p>
+    <div class="choice2"><button class="bigchoice" data-t="kosu"><span class="e">🏃</span>Koşu Bandı<br><small class="muted">Kalp-Damar ❤️ için</small></button>
+    <button class="bigchoice" data-t="ared"><span class="e">🏋️</span>ARED Ağırlık<br><small class="muted">Kemik & Kas 🦴 için</small></button></div>
+    <div class="fact">🚀 <b>Biliyor muydun?</b> Koşu bandında astronotlar uçup gitmesin diye lastik kemerlerle banda bağlanır!</div>`);
+  document.querySelectorAll('#modalBox .bigchoice').forEach(b=>b.onclick=()=>{Ses.tik();sporBasla(tok,b.dataset.t);});
+}
+function sporBasla(tok,tip){
+  let say=0,kalan=7,bitti=false;const hedef=35;
+  govde(`<p class="lead center">${tip==='kosu'?'🏃 Hızlı hızlı koş!':'🏋️ Ağırlığı kaldır!'} Butona olabildiğince hızlı bas! <span class="muted">(Boşluk tuşu da olur)</span></p>
+    <div class="tapzone"><div class="tapcount" id="tc">0</div><button class="tapbtn" id="tap">${tip==='kosu'?'KOŞ!':'KALDIR!'}</button>
+    <div class="prog"><i id="tp"></i></div><div id="tk" class="muted">7.0 sn</div></div>`);
+  const bas=()=>{if(bitti)return;say++;$('#tc').textContent=say;$('#tp').style.width=Math.min(100,say/hedef*100)+'%';Ses.ton(300+say*12,.04,'square',.04);};
+  $('#tap').addEventListener('pointerdown',e=>{e.preventDefault();bas();});
+  modalTus=e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();if(!e.repeat)bas();}};
+  const bas0=performance.now();
+  const iv=setInterval(()=>{
+    if(tok!==modalTok){clearInterval(iv);return;}
+    kalan=7-(performance.now()-bas0)/1000;
+    const tk=$('#tk');if(tk)tk.textContent=Math.max(0,kalan).toFixed(1)+' sn';
+    if(kalan<=0){clearInterval(iv);bitti=true;modalTus=null;sporSonuc(tip,say,hedef);}
+  },100);
+}
+function sporSonuc(tip,say,hedef){
+  const r=Math.min(1,say/hedef);
+  const e=tip==='kosu'?{kalp:Math.round(30*r),kemik:Math.round(8*r),enerji:-8,su:-8}:{kemik:Math.round(30*r),kalp:Math.round(8*r),enerji:-8,su:-8};
+  etkiUygula(e);const p=Math.round(20+60*r);puan(p);G.ist.aktivite++;gorevTamam('spor');Ses.iyi();
+  govde(`<div class="res good center"><div style="font-size:46px">${r>=.8?'🏆':r>=.5?'💪':'👍'}</div><b>${say} tekrar!</b> +${p} ⭐<br>
+    ${Object.entries(e).map(([k,v])=>`${INDK[k].ik} ${v>0?'+':''}${v}`).join(' &nbsp; ')}</div>
+    <div class="fact">🚀 <b>Gerçek uzayda:</b> Astronotlar her gün yaklaşık 2 saat egzersiz yapar. Egzersiz enerji ve su harcatır, sonra mutfağa uğramayı unutma!</div>${devamBtn('spor')}`);
+}
+
+/* --- Mutfak --- */
+const YEMEK=[
+  {e:'🥛',ad:'Süt / Yoğurt',f:{kemik:10,su:5},iyi:1,not:'Kalsiyum kemikleri güçlendirir.'},
+  {e:'🐟',ad:'Somon',f:{kalp:10,kemik:6},iyi:1,not:'Omega-3 ve D vitamini kalbe ve kemiğe iyi gelir.'},
+  {e:'🥦',ad:'Brokoli',f:{bagisiklik:10,kemik:3},iyi:1,not:'Vitaminler bağışıklığı destekler.'},
+  {e:'🍓',ad:'Meyve',f:{bagisiklik:8,su:5},iyi:1,not:'C vitamini ve antioksidanlar radyasyona karşı hücreleri destekler.'},
+  {e:'🥜',ad:'Kuruyemiş',f:{kalp:6,enerji:6},iyi:1,not:'Sağlıklı yağlar uzun süre enerji verir.'},
+  {e:'🍞',ad:'Tam Tahıl',f:{enerji:10},iyi:1,not:'Yavaş sindirilir, enerjiyi dengeler.'},
+  {e:'💧',ad:'Su + Elektrolit',f:{su:22},iyi:1,not:'Vücut sıvısını dengeler.'},
+  {e:'🍟',ad:'Cips',f:{su:-8,kemik:-6},iyi:0,not:'Çok tuzlu! Uzayda fazla tuz kemik kaybını artırabilir.'},
+  {e:'🥤',ad:'Gazlı İçecek',f:{kemik:-5,su:-3},iyi:0,not:'Şeker ve asit kemiklere ve dişlere zarar verebilir.'},
+  {e:'🍬',ad:'Şekerleme',f:{enerji:3,bagisiklik:-5},iyi:0,not:'Kısa süreli enerji verir, sonra düşüş yaşatır.'}
+];
+function oyunMutfak(){
+  const secili=new Set();
+  modalAc('Mutfak','🍽️',`<p class="lead">Dengeli bir öğün için <b>3 yiyecek</b> seç. Hangi besin hangi göstergeye iyi gelir, düşün!</p>
+    <div class="foods">${YEMEK.map((y,i)=>`<button class="food" data-i="${i}"><span class="e">${y.e}</span>${y.ad}</button>`).join('')}</div>
+    <div class="mfoot"><button class="btn yellow" id="ye" disabled>Öğünü Ye (0/3)</button></div>`);
+  const ye=$('#ye');
+  document.querySelectorAll('#modalBox .food').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;Ses.tik();
+    if(secili.has(i)){secili.delete(i);b.classList.remove('sel');}
+    else if(secili.size<3){secili.add(i);b.classList.add('sel');}
+    ye.disabled=secili.size!==3;ye.textContent=`Öğünü Ye (${secili.size}/3)`;
+  });
+  ye.onclick=()=>{
+    const list=[...secili].map(i=>YEMEK[i]);const top={su:8};let iyi=0,kotu=0;
+    list.forEach(y=>{for(const k in y.f)top[k]=(top[k]||0)+y.f[k];y.iyi?iyi++:kotu++;});
+    etkiUygula(top);const p=Math.max(5,20+15*iyi-10*kotu);puan(p);G.ist.aktivite++;gorevTamam('ogun');
+    iyi===3?Ses.iyi():kotu?Ses.kotu():Ses.iyi();
+    govde(`<div class="res ${kotu?'bad':'good'}"><b>${iyi===3?'🌟 Mükemmel dengeli öğün!':kotu?'🤔 Bazı seçimler sağlıksızdı.':'👍 İyi öğün!'}</b> +${p} ⭐<br>
+      ${Object.entries(top).filter(([,v])=>v).map(([k,v])=>`${INDK[k].ik} ${v>0?'+':''}${v}`).join(' &nbsp; ')}</div>
+      <div class="opts">${list.map(y=>`<div class="opt" style="cursor:default">${y.e} <b>${y.ad}:</b> ${y.not}</div>`).join('')}</div>
+      <div class="fact">🚀 <b>Gerçek uzayda:</b> Astronotların yemekleri vakumlu paketlenir; tortilla ekmek kullanılır çünkü normal ekmeğin kırıntıları havada uçuşup cihazlara kaçabilir!</div>${devamBtn('mutfak')}`);
+  };
+}
+
+/* --- Uyku Kabini --- */
+function oyunUyku(){
+  if(G.s.enerji>85){
+    modalAc('Uyku Kabini','🛏️',`<p class="lead">Enerjin <b>%${Math.round(G.s.enerji)}</b> — henüz yorgun değilsin. Uyku düzenini korumak için şimdi uyuma, işlerine devam et!</p>
+    <div class="fact">🚀 Astronotların günlük programında yaklaşık <b>8,5 saat</b> uyku zamanı bulunur.</div>${devamBtn('uyku','Tamam',6)}`);
+    return;
+  }
+  const kart=shuffle([['💡 Işıkları kıs',1],['🧷 Uyku tulumunu duvara bağla',1],['🎧 Göz bandı & kulak tıkacı tak',1],['📱 Tablette video izle',0],['☕ Enerji içeceği iç',0]]);
+  const sec=new Set();
+  const tok=modalAc('Uyku Kabini','🛏️',`<p class="lead">Uyumadan önce <b>3 doğru hazırlığı</b> seç. Uzayda uyku tulumları duvara bağlanır, yoksa uyurken süzülürsün!</p>
+    <div class="checks">${kart.map((k,i)=>`<button class="opt" data-i="${i}">${k[0]}</button>`).join('')}</div>
+    <div class="mfoot"><button class="btn" id="uyu" disabled>😴 Uyu (0/3)</button></div>`);
+  document.querySelectorAll('#modalBox .checks .opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;Ses.tik();
+    if(sec.has(i)){sec.delete(i);b.classList.remove('right');}else if(sec.size<3){sec.add(i);b.classList.add('right');}
+    $('#uyu').disabled=sec.size!==3;$('#uyu').textContent=`😴 Uyu (${sec.size}/3)`;
+  });
+  $('#uyu').onclick=()=>{
+    const dogru=[...sec].filter(i=>kart[i][1]).length;
+    govde(`<div class="sleepbox">🛌<span class="zz" style="left:55%;top:45%">Z</span><span class="zz" style="left:58%;top:40%;animation-delay:.5s">z</span><span class="zz" style="left:52%;top:42%;animation-delay:1s">Z</span></div><p class="center muted mt">İyi uykular astronot...</p>`);
+    sonra(tok,2600,()=>{
+      const e={enerji:22+8*dogru,moral:5};etkiUygula(e);G.t=Math.min(GUN_SURE-1,G.t+6);
+      const p=20+10*dogru;puan(p);G.ist.aktivite++;Ses.iyi();
+      govde(`<div class="res ${dogru===3?'good':'bad'}"><b>${dogru===3?'🌙 Mükemmel uyku hazırlığı!':`${dogru}/3 doğru hazırlık.`}</b> +${p} ⭐<br>⚡ +${e.enerji} &nbsp; 😊 +5 &nbsp; <span class="muted">(zaman ilerledi)</span></div>
+      ${dogru<3?'<div class="fact">Ekran ışığı ve kafein uykuyu bozar. Doğru hazırlıklar: ışıkları kısmak, uyku tulumunu bağlamak, göz bandı ve kulak tıkacı.</div>':''}
+      <div class="fact">🚀 <b>Gerçek uzayda:</b> İstasyon Dünya'nın etrafını 90 dakikada bir döner; astronotlar günde 16 gün doğumu görür. Bu yüzden düzenli uyku planı çok önemlidir.</div>${devamBtn('uyku')}`);
+    });
+  };
+}
+
+/* --- Sera --- */
+const BITKI=[['🥬','Marul'],['🌶️','Biber'],['🍅','Domates'],['🌻','Ayçiçeği'],['🥕','Havuç'],['🌿','Fesleğen']];
+function oyunSera(){
+  const tok=modalAc('Sera','🌱',`<p class="lead">Kuruyan bitkileri 💧 sulamak için üzerlerine dokun! <b>8 saniyen</b> var.</p>
+    <div class="plants">${BITKI.map((b,i)=>`<button class="plant" data-i="${i}">${b[0]}<small>${b[1]}</small></button>`).join('')}</div>
+    <div class="prog mt"><i id="sp" style="background:linear-gradient(90deg,#9dff9d,#2fbf63)"></i></div><p class="center mt"><b id="sn">0</b> bitki sulandı</p>`);
+  const els=[...document.querySelectorAll('#modalBox .plant')];let n=0,bitti=false;
+  const kurut=()=>{const ok=els.filter(e=>!e.classList.contains('dry'));if(ok.length)pick(ok).classList.add('dry');};
+  kurut();kurut();
+  els.forEach(el=>el.addEventListener('pointerdown',e=>{e.preventDefault();if(bitti||!el.classList.contains('dry'))return;el.classList.remove('dry');n++;$('#sn').textContent=n;Ses.ton(700+n*40,.08,'triangle',.07);}));
+  const t0=performance.now();
+  const iv=setInterval(()=>{
+    if(tok!==modalTok){clearInterval(iv);return;}
+    const g=(performance.now()-t0)/1000;$('#sp').style.width=Math.min(100,g/8*100)+'%';
+    if(Math.random()<.32)kurut();
+    if(g>=8){clearInterval(iv);bitti=true;
+      const e={moral:Math.min(30,6+n*3),bagisiklik:Math.min(10,n)};etkiUygula(e);const p=10+n*6;puan(p);G.ist.aktivite++;Ses.iyi();
+      govde(`<div class="res good center"><div style="font-size:46px">🌿</div><b>${n} bitki suladın!</b> +${p} ⭐<br>😊 +${e.moral} &nbsp; 🛡️ +${e.bagisiklik}</div>
+      <div class="fact">🚀 <b>Gerçek uzayda:</b> NASA'nın <b>Veggie</b> deneyinde astronotlar uzayda marul, turp ve hatta acı biber yetiştirip yedi! Bitkilerle ilgilenmek astronotların ruh halini de iyileştirir.</div>${devamBtn('sera')}`);
+    }
+  },100);
+}
+
+/* --- İletişim Odası: duygu kontrolü + aile görüşmesi --- */
+const RUH=[['😄','Harika','Harika! Bu enerjini ekip arkadaşlarınla paylaş.'],['🙂','İyi','Güzel! Rutinini korumaya devam et.'],['😐','Normal','Normal hissetmek de sorun değil. Kısa bir mola iyi gelebilir.'],['😟','Endişeli','Endişelerini yazmak veya biriyle konuşmak rahatlatır. Nefes egzersizi dene: 4 sn al, 4 sn tut, 4 sn ver.'],['😢','Üzgün','Üzgün hissetmek normaldir. Ailenle konuşmak ve uçuş psikoloğuna anlatmak çok yardımcı olur.']];
+function oyunIletisim(){
+  const tok=modalAc('İletişim Odası','📡',`<p class="lead">1️⃣ <b>Duygu kontrolü:</b> Bugün kendini nasıl hissediyorsun? Dürüstçe seç — doğru ya da yanlış cevap yok.</p>
+    <div class="moods">${RUH.map((r,i)=>`<button class="mood" data-i="${i}"><span class="e">${r[0]}</span>${r[1]}</button>`).join('')}</div>`);
+  document.querySelectorAll('#modalBox .mood').forEach(b=>b.onclick=()=>{
+    const r=RUH[+b.dataset.i];Ses.tik();
+    G.ruh.push({gun:G.gun,e:r[0]});
+    govde(`<div class="res good">${r[0]} <b>${r[1]}</b> — ${r[2]}</div><p class="lead mt">2️⃣ Şimdi Dünya'daki ailenle görüntülü görüş!</p>
+      <div class="mfoot"><button class="btn" id="ara">📞 Ailemi Ara</button></div>`);
+    $('#ara').onclick=()=>{
+      Ses.tik();
+      govde(`<div class="callbox"><div class="big">📞</div><div>Bağlanıyor... <span class="muted">(sinyal Dünya'ya gidip geliyor)</span></div></div>`);
+      sonra(tok,1800,()=>{
+        govde(`<div class="callbox"><div class="big">👨‍👩‍👧</div><div><b>"Seni çok özledik, seninle gurur duyuyoruz!"</b> ❤️</div></div>`);
+        Ses.iyi();
+        sonra(tok,1700,()=>{
+          const e={moral:28};etkiUygula(e);puan(40);G.ist.aktivite++;gorevTamam('duygu');
+          govde(`<div class="res good center"><b>Aile görüşmesi tamamlandı!</b> +40 ⭐<br>😊 Ruh Hali +28</div>
+          <div class="fact">🚀 <b>Gerçek uzayda:</b> Astronotlar her hafta aileleriyle görüntülü görüşür ve uçuş psikoloğuyla konuşur. Ay'dan Dünya'ya sinyal yaklaşık 1,3 saniyede gider; Mars'tan ise 20 dakikayı bulabilir!</div>${devamBtn('iletisim')}`);
+        });
+      });
+    };
+  });
+}
+
+/* --- Radyasyon Sığınağı --- */
+function oyunSiginak(){
+  const tok=modalAc('Radyasyon Sığınağı','☢️',`<p class="lead">Burası güneş patlamalarında saklanacağın en korunaklı yer. Radyasyon dozun: <b>${G.doz.toFixed(1)} mSv</b></p><div id="sgIc"></div>`);
+  const ic=$('#sgIc');
+  let html='';
+  if(!G.radQuiz){
+    const sec=shuffle([['Su ve plastik (polietilen) dolu kalın duvarlar',1],['Cam pencere',0],['İnce alüminyum folyo',0]]);
+    html=`<p class="lead"><b>Soru:</b> Uzay radyasyonuna karşı hangisi en iyi korur?</p><div class="opts">${sec.map((s,i)=>`<button class="opt" data-i="${i}">${s[0]}</button>`).join('')}</div><div id="sgS"></div>`;
+    ic.innerHTML=html;
+    const btns=[...ic.querySelectorAll('.opt')];
+    btns.forEach(b=>b.onclick=()=>{
+      G.radQuiz=true;const d=!!sec[+b.dataset.i][1];
+      btns.forEach((x,i)=>{x.disabled=true;if(sec[i][1])x.classList.add('right');});if(!d)b.classList.add('wrong');
+      if(d){puan(60);G.ist.dogru++;etkiUygula({radyasyon:8});Ses.iyi();}else{G.ist.yanlis++;Ses.kotu();}
+      $('#sgS').innerHTML=`<div class="res ${d?'good':'bad'}">${d?'✅ Doğru! +60 ⭐ ☢️ +8':'❌ Doğru cevap yeşil ile gösterildi.'}</div><div class="fact">💧 Hidrojen bakımından zengin su ve plastikler yüksek enerjili parçacıkları yavaşlatır. Bu yüzden sığınak duvarlarında su tankları kullanılır.</div>`+yelekHTML();
+      yelekBagla();
+    });
+  }else{
+    ic.innerHTML=yelekHTML();yelekBagla();
+  }
+}
+function yelekHTML(){
+  if(G.yelek)return `<div class="fact">🦺 Bugün radyasyon yeleğini zaten giydin. Güneş patlaması alarmı gelirse hemen buraya koş!</div>${devamBtn('siginak','Tamam',8)}`;
+  return `<p class="lead mt">🦺 Bugünkü koruma için radyasyon yeleğini giy.</p><div class="mfoot"><button class="btn yellow" id="yelek">🦺 Yeleği Giy</button></div>`;
+}
+function yelekBagla(){
+  const b=$('#yelek');if(!b)return;
+  b.onclick=()=>{G.yelek=true;etkiUygula({radyasyon:12});puan(25);G.ist.aktivite++;Ses.iyi();
+    b.parentElement.outerHTML=`<div class="res good">🦺 Yelek giyildi! ☢️ +12 &nbsp; +25 ⭐</div><div class="fact">🚀 <b>Gerçek uzayda:</b> Artemis I görevinde Orion kapsülündeki mankenlerden birine <b>AstroRad</b> adlı radyasyon koruma yeleği giydirilerek test edildi.</div>${devamBtn('siginak')}`;};
+}
+
+/* =====================================================================
+   EKRANLAR
+   ===================================================================== */
+function ekran(html){const s=$('#screen');s.innerHTML=html;show(s);s.scrollTop=0;}
+function ekranKapat(){hide('#screen');$('#screen').innerHTML='';}
+function avaHTML(renk,s=1){return `<span class="ava" style="--c:${renk};--s:${s}"><span class="h"><i></i></span><span class="t"></span><span class="l"></span></span>`;}
+function oyuncuKaydet(){Store.set('astroSaglik_oyuncular',G.oyuncular.map(o=>({ad:o.ad,renk:o.renk})));}
+
+let seciliRenk=RENKLER[0];
+function menu(){
+  G.durum='menu';hide('#hud');hide('#modal');
+  const rek=Store.get(REKOR_KEY,[]).slice(0,5);
+  ekran(`<div class="wrap">
+    <div class="logo"><h1>ASTRO SAĞLIK</h1><div class="sub">🚀 Uzay İstasyonu Sağlık Görevi</div>
+      <div class="tag">NASA Space Apps Challenge 2026 · Astronotlar için sağlık izleme oyunu</div></div>
+    <div class="grid2">
+      <div class="card pad">
+        <h3>👩‍🚀 Astronot Ekibi</h3>
+        <div class="row"><input class="inp" id="ad" maxlength="14" placeholder="Astronot adı yaz..." autocomplete="off"><button class="btn green" id="ekle">+ Ekle</button></div>
+        <div class="swatches">${RENKLER.map(r=>`<button class="sw ${r===seciliRenk?'sel':''}" data-r="${r}" style="background:${r}" aria-label="renk"></button>`).join('')}</div>
+        <div class="plist" id="plist"></div>
+      </div>
+      <div class="card pad">
+        <h3>🗓️ Görev Süresi</h3>
+        <div class="seg" id="seg">${[[3,'Kısa · 3 gün'],[5,'Normal · 5 gün'],[7,'Uzun · 7 gün']].map(([n,t])=>`<button data-n="${n}" class="${G.gunSayisi===n?'on':''}">${t}</button>`).join('')}</div>
+        <p class="muted mt" style="font-size:14px">Her oyuncu sırayla görevi oynar. Her görev günü ${GUN_SURE} saniye sürer. En yüksek puanı alan kazanır!</p>
+        <div class="row mt">
+          <button class="btn big yellow" id="basla" style="flex:1">▶ GÖREVE BAŞLA</button>
+        </div>
+        <div class="row mt"><button class="btn ghost small" id="nasil" style="flex:1">❓ Nasıl Oynanır</button><button class="btn ghost small" id="rekorBtn" style="flex:1">🏆 Rekorlar</button></div>
+        ${rek.length?`<h3 class="mt" style="font-size:16px">🏆 En İyi Skorlar</h3><ul class="mini-rec">${rek.map((r,i)=>`<li><span>${['🥇','🥈','🥉','4.','5.'][i]} ${esc(r.ad)} <small>(${r.gun} gün)</small></span><b>${r.skor}</b></li>`).join('')}</ul>`:''}
+      </div>
+    </div>
+  </div>`);
+  const ciz=()=>{
+    $('#plist').innerHTML=G.oyuncular.length?G.oyuncular.map((o,i)=>`<div class="pitem"><span class="no">${i+1}</span>${avaHTML(o.renk,.6)}<span>${esc(o.ad)}</span><button class="x" data-i="${i}" aria-label="sil">✖</button></div>`).join('')
+      :'<div class="empty">Henüz astronot yok. Adını yazıp <b>+ Ekle</b>\'ye bas. Sırayla oynayacak tüm arkadaşlarını ekleyebilirsin (en fazla 8).</div>';
+    $('#basla').disabled=!G.oyuncular.length;
+    $('#plist').querySelectorAll('.x').forEach(b=>b.onclick=()=>{G.oyuncular.splice(+b.dataset.i,1);oyuncuKaydet();ciz();});
+  };
+  ciz();
+  const ekle=()=>{
+    const ad=$('#ad').value.trim();if(!ad){$('#ad').focus();return;}
+    if(G.oyuncular.length>=8){toast('En fazla 8 oyuncu ekleyebilirsin.','warn');return;}
+    G.oyuncular.push({ad,renk:seciliRenk,skor:null,detay:null});oyuncuKaydet();$('#ad').value='';Ses.init();Ses.tik();
+    const bos=RENKLER.find(r=>!G.oyuncular.some(o=>o.renk===r));if(bos){seciliRenk=bos;document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('sel',s.dataset.r===bos));}
+    ciz();
+  };
+  $('#ekle').onclick=ekle;$('#ad').addEventListener('keydown',e=>{if(e.key==='Enter')ekle();});
+  document.querySelectorAll('.sw').forEach(s=>s.onclick=()=>{seciliRenk=s.dataset.r;document.querySelectorAll('.sw').forEach(x=>x.classList.toggle('sel',x===s));avatarAyarla('?',seciliRenk);});
+  document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{G.gunSayisi=+b.dataset.n;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));});
+  $('#basla').onclick=()=>{Ses.init();G.oyuncular.forEach(o=>{o.skor=null;o.detay=null;});G.sira=0;siraEkrani();};
+  $('#nasil').onclick=nasil;$('#rekorBtn').onclick=rekorlar;
+}
+
+function nasil(){
+  const geri=G.durum==='duraklat'?duraklatEkrani:menu;
+  ekran(`<div class="wrap" style="max-width:860px"><div class="card pad">
+    <h3 style="font-size:26px">❓ Nasıl Oynanır?</h3>
+    <p class="lead">Uzun uzay görevlerinde astronotlar radyasyon, yalnızlık, değişen yerçekimi ve kapalı ortam yüzünden sağlık sorunları yaşayabilir. Senin görevin: <b>sağlık verilerini topla → değerlendir → harekete geç!</b></p>
+    <div class="helpgrid">
+      <div class="hcard"><b>🩺 Sağlık Paneli</b><br>Sol üstte 7 gösterge var. Zamanla azalırlar. Biri <b>0</b> olursa tıbbi tahliye olur ve görev biter! Göstergeye dokunursan bilgi verir.</div>
+      <div class="hcard"><b>🏢 İstasyonlar</b><br>🩺 Tıp: tarama & teşhis · 🏋️ Spor: kalp ve kemik · 🍽️ Mutfak: su & beslenme · 🌱 Sera & 📡 İletişim: ruh hali · 🛏️ Uyku: enerji · ☢️ Sığınak: radyasyon</div>
+      <div class="hcard"><b>🚨 Sağlık Olayları</b><br>Alarm çalınca kırmızı ışın ve ok ⬆ hedef istasyonu gösterir. Süre bitmeden git ve doğru kararı ver: <b>+150 ⭐</b></div>
+      <div class="hcard"><b>☀️ Güneş Patlaması</b><br>Turuncu alarmda hemen ☢️ Radyasyon Sığınağının pedine koş ve fırtına bitene kadar orada kal!</div>
+      <div class="hcard"><b>📋 Günlük Görevler</b><br>Her gün tarama, egzersiz, öğün ve duygu kontrolü yap: <b>+100 ⭐</b> bonus. Gün sonunda sağlığın kadar bonus kazanırsın.</div>
+      <div class="hcard"><b>💎 Kristaller</b><br>Etrafta uçan veri kristallerini topla (+10). Kutuların tepesindeki altın kristal +30!</div>
+      <div class="hcard"><b>⌨️ Bilgisayar</b><br><span class="kb">W A S D</span> / oklar: yürü · <span class="kb">Boşluk</span>: zıpla · <span class="kb">E</span>: kullan · Ekrana tıkla, sonra fareyi oynat: etrafa bak · <span class="kb">V</span>: oyuncunun gözünden / arkadan · <span class="kb">Esc</span>: fareyi serbest bırak · <span class="kb">P</span>: duraklat</div>
+      <div class="hcard"><b>📱 Tablet</b><br>Sol alttaki joystick ile yürü, ekranı sürükleyerek kamerayı çevir. 👁 butonu: oyuncunun gözünden bak. <b>KULLAN</b> ve <b>ZIPLA</b> butonları sağ altta.</div>
+    </div>
+    <div class="row mt" style="justify-content:flex-end"><button class="btn" id="geri">◀ Geri</button></div>
+  </div></div>`);
+  $('#geri').onclick=geri;
+}
+function rekorlar(){
+  const rek=Store.get(REKOR_KEY,[]);
+  ekran(`<div class="wrap" style="max-width:640px"><div class="card pad"><h3 style="font-size:26px">🏆 Tüm Zamanların Rekorları</h3>
+    ${rek.length?`<table class="rank"><tr><th>#</th><th>Astronot</th><th>Görev</th><th>Tarih</th><th style="text-align:right">Puan</th></tr>${rek.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.ad)}</td><td>${r.gun} gün</td><td class="muted">${esc(r.tarih)}</td><td class="r">${r.skor}</td></tr>`).join('')}</table>`:'<p class="muted">Henüz rekor yok. İlk rekoru sen kır!</p>'}
+    <div class="row mt" style="justify-content:space-between"><button class="btn ghost small" id="sil">🗑️ Rekorları sil</button><button class="btn" id="geri">◀ Geri</button></div></div></div>`);
+  $('#geri').onclick=menu;
+  $('#sil').onclick=()=>{if($('#sil').dataset.onay){Store.set(REKOR_KEY,[]);rekorlar();}else{$('#sil').dataset.onay=1;$('#sil').textContent='Emin misin? Tekrar bas';}};
+}
+
+function siraEkrani(){
+  G.durum='intro';hide('#hud');
+  const o=G.oyuncular[G.sira];
+  avatarAyarla(o.ad,o.renk);P.x=0;P.y=0;P.z=7;P.yon=0;
+  ekran(`<div class="wrap" style="max-width:560px"><div class="card pad center">
+    <p class="muted">Oyuncu ${G.sira+1} / ${G.oyuncular.length}</p>
+    <div style="margin:12px 0">${avaHTML(o.renk,1.6)}</div>
+    <h2 style="font-size:34px">Sıra sende, ${esc(o.ad)}! 🚀</h2>
+    <p class="lead mt">Astronotun <b>${G.gunSayisi} günlük</b> görevde. Sağlık panelini izle, istasyonları kullan, alarmlara hızlı yanıt ver ve astronotunu sağlıklı tut!</p>
+    <div class="row mt" style="justify-content:center"><button class="btn big yellow" id="go">▶ BAŞLA</button></div>
+    <div class="row mt" style="justify-content:center"><button class="btn ghost small" id="nasil2">❓ Nasıl Oynanır</button><button class="btn ghost small" id="menuB">🏠 Ana Menü</button></div>
+  </div></div>`);
+  $('#go').onclick=()=>{Ses.init();Ses.gun();ekranKapat();gorevBaslat();};
+  $('#nasil2').onclick=()=>{nasil();$('#geri').onclick=siraEkrani;};
+  $('#menuB').onclick=menu;
+}
+function gorevBaslat(){
+  const o=G.oyuncular[G.sira];
+  yeniGorev();avatarAyarla(o.ad,o.renk);
+  $('#hudAd').textContent=o.ad;$('#hudDot').style.background=o.renk;
+  show('#hud');G.durum='oyun';sonZaman=performance.now();
+  canvas.focus();kilitle();
+  setTimeout(()=>toast('🩺 İlk iş: <b>Tıp Merkezinde</b> sağlık taraması yap!','info',3600),600);
+}
+function duraklat(){if(G.durum!=='oyun')return;G.durum='duraklat';tuslariTemizle();duraklatEkrani();}
+function duraklatEkrani(){
+  G.durum='duraklat';
+  ekran(`<div class="wrap" style="max-width:440px"><div class="card pad center"><h2 style="font-size:32px">⏸ Duraklatıldı</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+      <button class="btn big green" id="dv">▶ Devam Et</button>
+      <button class="btn ghost" id="ns">❓ Nasıl Oynanır</button>
+      <button class="btn yellow" id="bt">🏁 Görevimi Bitir (puanı kaydet)</button>
+      <button class="btn red" id="mn">🏠 Ana Menüye Dön</button></div></div></div>`);
+  $('#dv').onclick=devam;$('#ns').onclick=nasil;
+  $('#bt').onclick=()=>{ekranKapat();bitir(false,null,true);};
+  $('#mn').onclick=()=>{if($('#mn').dataset.o){menu();}else{$('#mn').dataset.o=1;$('#mn').textContent='Emin misin? Puanlar kaydedilmez';}};
+}
+function devam(){ekranKapat();G.durum='oyun';sonZaman=performance.now();kilitle();}
+
+function bitir(basarili,ind,erken){
+  if(G.durum==='karne')return;
+  if(G.olay){G.olay=null;isin.visible=false;hide('#olayBanner');$('#flare').classList.remove('on');flareLight.intensity=0;}
+  hide('#modal');modalTok++;
+  G.durum='karne';hide('#hud');$('#vignette').classList.remove('on');
+  const ort=ortalama();
+  let bonus=0;
+  if(basarili){bonus=200+Math.round(ort*3);G.skor+=bonus;}
+  if(!basarili&&G.t>2&&G.gunluk.length<G.gun)G.gunluk.push({gun:G.gun,ort});
+  const o=G.oyuncular[G.sira];
+  const yildiz=basarili?(ort>=70?3:ort>=45?2:1):(erken?0:0);
+  o.skor=G.skor;o.detay={basarili,ort:Math.round(ort),gun:Math.min(G.gun,G.gunSayisi),yildiz};
+  const rek=Store.get(REKOR_KEY,[]);
+  rek.push({ad:o.ad,skor:G.skor,gun:G.gunSayisi,tarih:new Date().toLocaleDateString('tr-TR')});
+  rek.sort((a,b)=>b.skor-a.skor);Store.set(REKOR_KEY,rek.slice(0,10));
+  const enDusuk=IND.slice().sort((a,b)=>G.s[a.k]-G.s[b.k])[0];
+  const baslik=basarili?'🎉 Görev Tamamlandı!':erken?'🏁 Görev Erken Bitirildi':'🚑 Tıbbi Tahliye!';
+  const alt=basarili?`Astronotun ${G.gunSayisi} günlük görevi başarıyla tamamladı. Tamamlama bonusu: <b>+${bonus}</b>`
+    :erken?'Görevi erken bitirdin; puanın kaydedildi.'
+    :`<b>${ind.ik} ${ind.ad}</b> sıfıra düştü ve astronot Dünya'ya geri gönderildi. Puanın kaydedildi.`;
+  const sonraki=G.sira+1<G.oyuncular.length?G.oyuncular[G.sira+1]:null;
+  ekran(`<div class="wrap" style="max-width:820px"><div class="card pad">
+    <div class="center"><div class="row" style="justify-content:center;gap:14px">${avaHTML(o.renk,1)}<div style="text-align:left"><div class="muted">${esc(o.ad)}</div><h2 style="font-size:30px">${baslik}</h2></div></div>
+      <p class="lead mt">${alt}</p>
+      <div class="bigscore" id="bs">0</div><div class="stars">${'⭐'.repeat(yildiz)}${'☆'.repeat(3-yildiz)}</div></div>
+    <div class="stats">
+      <div class="stat"><b>%${Math.round(ort)}</b><span>Ortalama sağlık</span></div>
+      <div class="stat"><b>${G.ist.dogru}</b><span>Doğru karar</span></div>
+      <div class="stat"><b>${G.ist.cozulen}</b><span>Çözülen olay</span></div>
+      <div class="stat"><b>${G.ist.kacan}</b><span>Kaçırılan olay</span></div>
+      <div class="stat"><b>${G.ist.tarama}</b><span>Sağlık taraması</span></div>
+      <div class="stat"><b>${G.ist.kristal}</b><span>Kristal</span></div>
+    </div>
+    <h3 class="mt">📊 Sağlık Karnesi</h3>
+    <div class="hbars">${IND.map(i=>`<div class="hb"><div class="row" style="justify-content:space-between"><span>${i.ik} ${i.ad}</span><b>${Math.round(G.s[i.k])}</b></div><div class="bar"><i style="width:${G.s[i.k]}%;background:${i.renk}"></i></div></div>`).join('')}</div>
+    ${G.gunluk.length?`<h3 class="mt">📈 Günlük Ortalama Sağlık</h3><div class="daychart">${G.gunluk.map(d=>`<div class="dc"><b>${Math.round(d.ort)}</b><i style="height:${Math.max(4,d.ort)}%"></i></div>`).join('')}</div><div class="daylabels">${G.gunluk.map(d=>`<span>${d.gun}. gün</span>`).join('')}</div>`:''}
+    ${G.ruh.length?`<h3 class="mt">📝 Ruh Hali Günlüğü</h3><p style="font-size:28px">${G.ruh.map(r=>`<span title="${r.gun}. gün">${r.e}</span>`).join(' ')}</p>`:''}
+    <div class="fact">💡 <b>Gelecek görev için ipucu:</b> En düşük göstergen ${enDusuk.ik} <b>${enDusuk.ad}</b> idi. ${esc(enDusuk.ipucu)}</div>
+    <div class="row mt" style="justify-content:flex-end">${sonraki?`<button class="btn big yellow" id="nx">▶ Sıradaki: ${esc(sonraki.ad)}</button>`:'<button class="btn big yellow" id="nx">🏆 Sonuçları Gör</button>'}</div>
+  </div></div>`);
+  const hedef=G.skor,t0=performance.now();
+  (function say(){const k=Math.min(1,(performance.now()-t0)/1400);const el=$('#bs');if(!el)return;el.textContent=Math.round(hedef*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(say);})();
+  basarili?Ses.iyi():Ses.kotu();
+  $('#nx').onclick=()=>{Ses.tik();G.sira++;if(G.sira<G.oyuncular.length)siraEkrani();else sonuclar();};
+}
+
+function sonuclar(){
+  G.durum='sonuc';hide('#hud');
+  const sirali=G.oyuncular.map((o,i)=>({...o,i})).filter(o=>o.skor!==null).sort((a,b)=>b.skor-a.skor);
+  const pod=[sirali[1],sirali[0],sirali[2]];
+  const yuk=[110,150,80],renk=['#c0c7d6','#ffd23f','#e0975a'],madalya=['🥈','🥇','🥉'];
+  ekran(`<div class="wrap" style="max-width:820px"><div class="card pad">
+    <div class="logo" style="margin-bottom:4px"><h1 style="font-size:clamp(32px,6vw,54px)">GÖREV SONUÇLARI</h1></div>
+    <div class="podium">${pod.map((o,k)=>o?`<div class="pod">${avaHTML(o.renk,k===1?1.25:1)}<div class="nm">${esc(o.ad)}</div><div class="sc">⭐ ${o.skor}</div><div class="blk" style="height:${yuk[k]}px;background:${renk[k]}">${madalya[k]}</div></div>`:'').join('')}</div>
+    <table class="rank"><tr><th>Sıra</th><th>Astronot</th><th>Durum</th><th>Ort. Sağlık</th><th style="text-align:right">Puan</th></tr>
+    ${sirali.map((o,i)=>`<tr><td><b>${i+1}.</b></td><td><span class="row" style="gap:8px">${avaHTML(o.renk,.45)} ${esc(o.ad)}</span></td><td>${o.detay.basarili?'✅ Tamamladı':'🚑 Tahliye/Erken'}</td><td>%${o.detay.ort}</td><td class="r">${o.skor}</td></tr>`).join('')}</table>
+    ${sirali[0]?`<p class="lead center mt">🏆 Tebrikler <b>${esc(sirali[0].ad)}</b>! Ekibin şampiyon astronotu sensin!</p>`:''}
+    <div class="row mt" style="justify-content:center"><button class="btn big yellow" id="tekrar">🔁 Tekrar Oyna</button><button class="btn big" id="ana">🏠 Ana Menü</button></div>
+  </div></div>`);
+  Ses.iyi();
+  $('#tekrar').onclick=()=>{G.oyuncular.forEach(o=>{o.skor=null;o.detay=null;});G.sira=0;siraEkrani();};
+  $('#ana').onclick=menu;
+}
+
+/* =====================================================================
+   HUD & MİNİ HARİTA
+   ===================================================================== */
+const mm=$('#minimap'),mmx=mm.getContext('2d');
+function hudGuncelle(){
+  for(const i of IND){
+    const v=G.s[i.k],e=hrowEls[i.k];
+    e.b.textContent=Math.round(v);e.bar.style.width=v+'%';
+    e.r.classList.toggle('warn',v<50&&v>=25);e.r.classList.toggle('crit',v<25);
+  }
+  $('#hudGun').textContent=`GÜN ${Math.min(G.gun,G.gunSayisi)}/${G.gunSayisi}`;
+  $('#gunBar').style.width=(G.t/GUN_SURE*100)+'%';
+  $('#hudSaat').textContent=Math.max(0,Math.ceil(GUN_SURE-G.t))+'s';
+  $('#hudSkor').textContent=G.skor;
+  if(G.olay){
+    const st=ISTK[G.olay.hedef];
+    $('#olayKalan').textContent=Math.ceil(G.olay.kalan)+' sn';
+    const dx=st.px-P.x,dz=st.pz-P.z,d=Math.hypot(dx,dz);
+    const fx=-Math.sin(kam.yaw),fz=-Math.cos(kam.yaw),rx=Math.cos(kam.yaw),rz=-Math.sin(kam.yaw);
+    const ang=Math.atan2(dx*rx+dz*rz,dx*fx+dz*fz);
+    $('#olayArrow').style.transform=`rotate(${ang}rad)`;
+    $('#olayMesafe').textContent=d<4.2?'buradasın':Math.round(d)+' m';
+  }
+  promptGuncelle();
+  haritaCiz();
+}
+function haritaCiz(){
+  const W=mm.width,s=W/66,M=(x,z)=>[(x+33)*s,(z+33)*s];
+  mmx.clearRect(0,0,W,W);
+  mmx.fillStyle='rgba(60,71,114,.9)';rr(mmx,s,s,64*s,64*s,10);mmx.fill();
+  mmx.strokeStyle='#34d5ff';mmx.lineWidth=3;mmx.stroke();
+  mmx.fillStyle='#34406e';mmx.beginPath();mmx.arc(...M(0,0),3.6*s,0,7);mmx.fill();
+  mmx.fillStyle='rgba(255,255,255,.18)';
+  KUTULAR.forEach(k=>{const [x,y]=M(k[0]-k[2]/2,k[1]-k[2]/2);mmx.fillRect(x,y,k[2]*s,k[2]*s);});
+  mmx.fillStyle='#7cf3ff';kristaller.forEach(m=>{if(m.visible){const [x,y]=M(m.position.x,m.position.z);mmx.fillRect(x-3,y-3,6,6);}});
+  mmx.textAlign='center';mmx.textBaseline='middle';mmx.font=`${Math.round(W*.085)}px "Segoe UI Emoji","Apple Color Emoji",sans-serif`;
+  for(const st of ISTASYON){
+    const [x,y]=M(st.x,st.z);
+    const hedef=G.olay&&G.olay.hedef===st.id;
+    if(hedef){mmx.strokeStyle=G.olay.flare?'#ffa000':'#ff3355';mmx.lineWidth=5;mmx.beginPath();mmx.arc(x,y,W*.075+Math.sin(T*8)*4,0,7);mmx.stroke();}
+    mmx.fillStyle=st.css;mmx.beginPath();mmx.arc(x,y,W*.06,0,7);mmx.fill();
+    mmx.fillText(st.ik,x,y+1);
+  }
+  const [px,py]=M(P.x,P.z);
+  mmx.save();mmx.translate(px,py);mmx.rotate(-P.yon+Math.PI);
+  mmx.fillStyle=G.oyuncular[G.sira]?G.oyuncular[G.sira].renk:'#fff';mmx.strokeStyle='#fff';mmx.lineWidth=3;
+  mmx.beginPath();mmx.moveTo(0,-W*.05);mmx.lineTo(W*.035,W*.035);mmx.lineTo(-W*.035,W*.035);mmx.closePath();mmx.fill();mmx.stroke();mmx.restore();
+}
+
+/* =====================================================================
+   ANA DÖNGÜ
+   ===================================================================== */
+let sonZaman=performance.now(),T=0,hudT=0,menuAci=0;
+function boyut(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+addEventListener('resize',boyut);boyut();
+const hedefV=new THREE.Vector3();
+function kameraGuncelle(dt){
+  const oyunda=G.durum==='oyun'||G.durum==='modal'||G.durum==='duraklat';
+  avatar.visible=!(oyunda&&kam.fp);
+  if(G.durum!=='oyun')kilitAc();
+  if(oyunda&&kam.fp){
+    // Oyuncunun gözünden: kafa hizasında, bakış yönü yaw + bak
+    const sall=P.yer&&P.hiz>.1?Math.abs(Math.sin(P.faz))*.06:0;
+    const gx=P.x-Math.sin(kam.yaw)*.25,gz=P.z-Math.cos(kam.yaw)*.25,gy=P.y+2.55+sall;
+    camera.position.set(gx,gy,gz);
+    const cb=Math.cos(kam.bak);
+    hedefV.set(gx-Math.sin(kam.yaw)*cb,gy-Math.sin(kam.bak),gz-Math.cos(kam.yaw)*cb);
+    camera.lookAt(hedefV);
+    kam.anlik=null;
+  }else if(oyunda){
+    const cp=Math.cos(kam.pitch),ox=Math.sin(kam.yaw)*cp,oy=Math.sin(kam.pitch),oz=Math.cos(kam.yaw)*cp;
+    // kamera binaların içine girmesin
+    let uz=kam.uzak;
+    for(let d=1;d<=kam.uzak;d+=.4){
+      const q={x:P.x+ox*d,y:P.y+1.6+oy*d,z:P.z+oz*d};
+      if(COL.some(o=>{if(q.y>o.top)return false;const dx=q.x-o.x,dz=q.z-o.z,lx=dx*o.c-dz*o.s,lz=dx*o.s+dz*o.c;return Math.abs(lx)<o.hx+.3&&Math.abs(lz)<o.hz+.3;})){uz=Math.max(2.2,d-.5);break;}
+    }
+    kam.anlik=kam.anlik==null?uz:kam.anlik+(uz-kam.anlik)*Math.min(1,dt*(uz<kam.anlik?20:4));
+    camera.position.set(P.x+ox*kam.anlik,P.y+1.6+oy*kam.anlik,P.z+oz*kam.anlik);
+    hedefV.set(P.x,P.y+1.6,P.z);camera.lookAt(hedefV);
+  }else if(G.durum==='intro'){
+    menuAci+=dt*.25;
+    camera.position.set(P.x+Math.sin(menuAci)*8,3.2,P.z+Math.cos(menuAci)*8);camera.lookAt(P.x,1.6,P.z);
+  }else{
+    menuAci+=dt*.07;
+    camera.position.set(Math.sin(menuAci)*40,21,Math.cos(menuAci)*40);camera.lookAt(0,2,0);
+  }
+}
+function dunyaAnim(dt){
+  earth.rotation.y+=dt*.02;moon.rotation.y+=dt*.01;
+  holo.rotation.y+=dt*.6;holo.rotation.x+=dt*.2;holoRing.rotation.z+=dt*.4;
+  const kalpAtis=1+Math.max(0,Math.sin(T*6))*.12;holoIc.scale.setScalar(kalpAtis);
+  holo.position.y=holoIc.position.y=holoRing.position.y=4.4+Math.sin(T*1.5)*.15;
+  for(const m of kristaller){if(!m.visible)continue;m.rotation.y+=dt*2;m.position.y=(m.userData.y0||1.2)+Math.sin(T*2+m.userData.ofs)*.2;}
+  for(const st of ISTASYON){
+    const hazir=!(G.cd&&G.cd[st.id]>0);const hedef=G.olay&&G.olay.hedef===st.id;
+    st.pad.material.emissiveIntensity=hedef?.9+Math.sin(T*8)*.4:hazir?.55+Math.sin(T*3)*.15:.12;
+    st.ring.scale.setScalar(1+(hazir||hedef?Math.sin(T*3)*.06:0));
+    st.ring.material.color.set(hedef?(G.olay.flare?0xffa000:0xff3355):hazir?0xffffff:0x556080);
+  }
+  if(isin.visible){isin.material.opacity=.22+Math.sin(T*6)*.1;isin.rotation.y+=dt;}
+}
+function dongu(now){
+  requestAnimationFrame(dongu);
+  const dt=Math.min(.1,(now-sonZaman)/1000);sonZaman=now;T+=dt;
+  if(G.durum==='oyun')guncelle(dt);
+  avatarAnim(dt);
+  dunyaAnim(dt);
+  kameraGuncelle(dt);
+  hudT+=dt;
+  if(hudT>.1&&(G.durum==='oyun'||G.durum==='modal')){hudT=0;hudGuncelle();}
+  kilitIpucuGuncelle();
+  renderer.render(scene,camera);
+}
+
+// Başlat (yazı tipi yüklenince etiketler güzel görünsün)
+const fontHazir=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+avatarAyarla('?',seciliRenk);
+fontHazir.then(()=>{
+  // etiketleri yeniden çiz (Fredoka yüklendiyse)
+  ISTASYON.forEach(st=>{const p=st.lab.parent,pos=st.lab.position.clone();p.remove(st.lab);const lab=etiket(`${st.ik} ${st.ad}`,st.css+'dd',1.5);lab.position.copy(pos);p.add(lab);st.lab=lab;});
+  menu();
+});
+requestAnimationFrame(dongu);
+
+// Test/geliştirme için dışarı aç
+window.__astro={G,P,kam,kameraModu,bakisDondur,olayBaslat,etkiles,bitir,ISTASYON};
+})();
+</script>
+</body>
+</html>
